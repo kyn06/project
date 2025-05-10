@@ -191,7 +191,6 @@ class User extends Model {
     $this->user = $user;
 
     // Get the user's role from the session
-    $role = $_SESSION['role'];
     $role = $_SESSION['role'] ?? null;
     $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     $pathSegments = explode('/', trim($currentPath, '/'));
