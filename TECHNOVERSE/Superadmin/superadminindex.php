@@ -8,8 +8,6 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-
-
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Super-admin') {
     // Redirect all non-super-admin users to a separate page
     header("Location: ../error/error404.php");

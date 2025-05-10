@@ -192,63 +192,55 @@ class User extends Model {
 
     // Get the user's role from the session
     $role = $_SESSION['role'];
+    $role = $_SESSION['role'] ?? null;
     $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    $pathSegments = explode('/', $currentPath);
+    $pathSegments = explode('/', trim($currentPath, '/'));
 
-        // Define access control based on user roles
-        switch ($role) {
-            case 'super-admin':
-                // Super-Admin has full access
+    // Define access control based on user roles
+    switch ($role) {
+        case 'super-admin':
+        case 'admin':
+            return $user;
+
+        case 'hr':
+            if (
+                in_array('companies', $pathSegments) ||
+                in_array('job_postings', $pathSegments) ||
+                in_array('applications', $pathSegments)
+            ) {
                 return $user;
+            } else {
+                $this->denyAccess("Access Denied. You can only access your company's profile, job postings, and applications.");
+            }
+            break;
 
-            case 'admin':
-                // Admin has full access
+        case 'job_seeker':
+            if (
+                in_array('applications', $pathSegments) ||
+                in_array('apply', $pathSegments)
+            ) {
                 return $user;
+            } else {
+                $this->denyAccess("Access Denied. You can only access your own applications.");
+            }
+            break;
 
-            case 'hr':
-                // HR can only access their own company's job postings and applications
-                if (in_array('company_profile', $pathSegments) || in_array('job_postings', $pathSegments) || in_array('applications', $pathSegments)) {
-                    return $user;
-                } else {
-                    http_response_code(403);
-                    echo "<h1 style='font-size: 60px; text-align: center'>
-                            Access Denied. You can only access your company's profile, job postings, and applications.
-                        </h1>";
-                    echo '<div style="font-size: 30px; text-align: center">
-                            <a href="../index.php" class="btn btn-outline-secondary">Go Back</a>
-                        </div>';
-                    exit();
-                }
-
-            case 'job_seeker':
-                // Job Seeker can only access their own applications
-                if (in_array('my_applications', $pathSegments) || in_array('apply', $pathSegments)) {
-                    return $user;
-                } else {
-                    http_response_code(403);
-                    echo "<h1 style='font-size: 60px; text-align: center'>
-                            Access Denied. You can only access your own applications.
-                        </h1>";
-                    echo '<div style="font-size: 30px; text-align: center">
-                            <a href="../index.php" class="btn btn-outline-secondary">Go Back</a>
-                        </div>';
-                    exit();
-                }
-
-            default:
-                // If the role is not recognized, deny access
-                http_response_code(403);
-                echo "<h1 style='font-size: 60px; text-align: center'>
-                        Access Denied. Contact your super-admin to access this page.
-                    </h1>";
-                echo '<div style="font-size: 30px; text-align: center">
-                        <a href="../index.php" class="btn btn-outline-secondary">Back to Home</a>
-                    </div>';
-                exit();
-        }
+        default:
+            // Unknown or missing role
+            $this->denyAccess("Access Denied. Contact your super-admin to access this page.");
     }
 
-
+    // Deny access method
+    private function denyAccess($message)
+    {
+        http_response_code(403);
+        echo "<h1 style='font-size: 60px; text-align: center'>$message</h1>";
+        echo '<div style="font-size: 30px; text-align: center">
+                <a href="../index.php" class="btn btn-outline-secondary">Go Back</a>
+            </div>';
+        exit();
+    }
+    
     public function getUserName() {
         return $this->user['first_name'];
     }
