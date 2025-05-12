@@ -196,7 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
 
   <div class="register-right">
-    <img src="login.png" alt="Character Illustration" class="character-image">
+    <img src="../../public/assets/images/logo.png" alt="Character Illustration" class="character-image">
   </div>
 </div>
 
