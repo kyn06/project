@@ -52,68 +52,152 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Register User</title>
 </head>
 <style>
-    body{
-            height: 100vh;
-            background-image: url('../../public/assets/images/technoverse.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+    * {
+      box-sizing: border-box;
+      font-family: 'Helvetica', sans-serif;
+      margin: 0;
+      padding: 0;
     }
-</style>
-<body>
+
+    body, html {
+      height: 100%;
+      background-color: #ffffff;
+    }
+    body.fade-out {
+        opacity: 0;
+        transition: opacity 0.5s ease-out;
+    }
+
+    .register-wrapper {
+      display: flex;
+      height: 100vh;
+    }
+
+    h1 {
+      font-size: 28.3px;
+      font-family: 'Helvetica', sans-serif;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 45%;
+      margin-left: 100px;
+      margin-top: 20px;
+    }
+
+    h1 span {
+      color: #4f48ec;
+    }
+
+    .register-left {
+      flex: 1;
+      padding: 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .register-left h2 {
+      color: #0f1035;
+      font-size: 36.4px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .register-left p.des {
+      color: #555;
+      font-size: 14.2px;
+      margin-bottom: 40px;
+    }
+    .register-form input {
+      margin-bottom: 15px;
+      border-radius: 20px;
+      border: 3px solid #100e34;
+      padding: 10px 20px;
+      width: 460px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 14px;
+    }
+
+    .register-form button {
+      border-radius: 20px;
+      padding: 10px;
+      background-color: #0f1035;
+      color: white;
+      border: none;
+      width: 460px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 14px;
+      cursor: pointer;
+
+      transition-property: transform;
+      transition-duration: 0.3s;
+      transition-timing-function: ease;
+      transition-delay: 0s;
+    }
+    .register-form button:hover {
+      transform: translateY(-2px);
+    }
+    .login-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .login-container a {
+      color: #ffbf18;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .register-right {
+      flex: 0 0 auto;
+      background-color: #ffbf18;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 550px;
+      height: 690px;
+      margin-top: 30px;
+      margin-right: 90px;
+      border-radius: 48px;
+    }
+
+    .character-image {
+      width: 100%;
+      max-width: 600px;
+      height: auto;
+    }
     
-<body class="d-flex justify-content-center align-items-center">
-<div class="card p-4 shadow rounded-4" style="min-width: 300px;">
-<div class="container mt-5">
-    <h2 class="text-center mb-4">CREATE AN ACCOUNT</h2>
+  </style>
+<body>
 
-    <!-- Display the message if it exists -->
-    <?php if (!empty($message)): ?>
-        <?php echo $message; ?>
-    <?php endif; ?>
+<div class="register-wrapper">
+  <h1><span><b>Techno</span>verse</b></h1>
+  <div class="register-left">
+    <h2 align="center">Create Account</h2>
+    <p align="center" class="des">Create your profile and apply with ease.</p>
 
-    <form method="POST" action="register.php" class="card p-4 shadow">
-        <div class="mb-3">
-            <label for="full_name" class="form-label">Full Name:</label>
-            <input type="text" class="form-control" name="full_name" id="full_name" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="email" class="form-label">Email:</label>
-            <input type="email" class="form-control" name="email" id="email" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="password" class="form-label">Password:</label>
-            <input type="password" class="form-control" name="password" id="password" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="phone_number" class="form-label">Phone Number:</label>
-            <input type="text" class="form-control" name="phone_number" id="phone_number" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="role" class="form-label">Role:</label>
-            <select class="form-select" name="role" id="role" required>
-                <option value="">Select Role</option>
-                <option value="Job-seeker">Job-seeker</option>
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label for="status" class="form-label">Status:</label>
-            <select class="form-select" name="status" id="status" required>
-                <option value="">Select Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-            </select>
-        </div>
-
-        <div class="d-grid">
-        <button type="submit" class="btn" style="background-color: #0f1035; color: white;">REGISTER</button>
-        </div>
+    <form method="POST" action="register.php" class="register-form">
+      <input type="text" name="full_name" placeholder="Full Name" required>
+      <input type="email" name="email" placeholder="Email Address" required>
+      <input type="text" name="phone_number" placeholder="Phone Number" required>
+      <input type="password" name="password" placeholder="Password" required>
+      <button type="submit">Register</button>
     </form>
+
+    <div class="login-container">
+      <p>Already have an account? <a href="login.php">Login</a></p>
+    </div>
+  </div>
+
+  <div class="register-right">
+    <img src="login.png" alt="Character Illustration" class="character-image">
+  </div>
 </div>
 
 </body>
