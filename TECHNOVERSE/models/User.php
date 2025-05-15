@@ -133,6 +133,29 @@ class User extends Model {
 
         return $users;
     }
+ public function getApplications() {
+    try {
+        $sql = "
+            SELECT 
+                a.*, 
+                u.full_name, 
+                j.job_title AS job_title, 
+                s.label AS status
+            FROM applications a
+            JOIN users u ON a.user_id = u.id
+            JOIN job_postings j ON a.job_posting_id = j.id
+            JOIN statuses s ON a.status_id = s.id
+            ORDER BY a.application_date DESC
+        ";
+        $stmt = self::$conn->query($sql);
+        $rows = $stmt->fetchAll(PDO::FETCH_OBJ);
+        return count($rows) > 0 ? $rows : null;
+    } catch (PDOException $e) {
+        die("Query failed: " . $e->getMessage());
+    }
+}
+
+
 
     public static function countAllUsers() {
         return self::countAll();
@@ -260,4 +283,86 @@ class User extends Model {
             ? array_map(fn($data) => new self($data), $result) 
             : null;
     }
+public function getApplicationStatusByUserId($userId) {
+    try {
+        $sql = "SELECT 
+                    a.id AS application_id,
+                    a.created_at AS application_date,
+                    a.status_id AS status,
+                    u.full_name,
+                    u.email,
+                    jp.job_title AS job_title,
+                    s.label AS status_label
+                FROM applications a
+                JOIN users u ON a.user_id = u.id
+                JOIN job_postings jp ON a.job_posting_id = jp.id
+                LEFT JOIN statuses s ON a.status_id = s.id
+                WHERE a.user_id = :userId";
+
+        $stmt = self::$conn->prepare($sql);
+        $stmt->bindValue(':userId', $userId);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    } catch (PDOException $e) {
+        die("Error fetching applications: " . $e->getMessage());
+    }
+}
+public function fetchApplicationStatsByLabel(): array {
+    try {
+        $stmt = self::$conn->prepare("
+            SELECT 
+                COUNT(*) AS total, 
+                SUM(status_id = '2') AS complete, 
+                SUM(status_id = '1') AS inprogress, 
+                SUM(status_id = '3') AS rejected 
+            FROM applications
+        ");
+        $stmt->execute();
+        $stats = $stmt->fetch(PDO::FETCH_ASSOC);
+        return [
+            'total' => $stats['total'] ?? 0,
+            'complete' => $stats['complete'] ?? 0,
+            'inprogress' => $stats['inprogress'] ?? 0,
+            'rejected' => $stats['rejected'] ?? 0,
+        ];
+    } catch (PDOException $e) {
+        error_log("Error fetching application stats: " . $e->getMessage());
+        return ['total' => 0, 'complete' => 0, 'inprogress' => 0, 'rejected' => 0];
+    }
+}
+
+public function fetchJobPostings(): array {
+    try {
+        $stmt = self::$conn->prepare("SELECT * FROM job_postings ORDER BY posted_at DESC");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error retrieving jobs: " . $e->getMessage());
+        return [];
+    }
+}
+
+public function fetchTotalApplications(): int {
+    try {
+        $stmt = self::$conn->prepare("SELECT COUNT(*) AS total_applications FROM applications");
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['total_applications'] ?? 0;
+    } catch (PDOException $e) {
+        error_log("Error retrieving total applications: " . $e->getMessage());
+        return 0;
+    }
+}
+
+public static function getNavbarFile(): string {
+    $role = $_SESSION['role'] ?? null;
+
+    return match ($role) {
+        'Job-seeker' => 'navbarforjobseeker.php',
+        'Super Admin' => 'superadmin/navbarsuperadmin.php',
+        'HR' => 'navbar.php',
+        default => 'navbar.php',
+    };
+}
+
 }
