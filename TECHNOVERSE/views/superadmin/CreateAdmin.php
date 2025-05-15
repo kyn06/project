@@ -7,8 +7,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $full_name = htmlspecialchars(trim($_POST['full_name']));
     $email = htmlspecialchars(trim($_POST['email']));
     $password = password_hash(trim($_POST['password']), PASSWORD_DEFAULT);
-    $role = "Admin"; // Auto-set to Admin
-    $status = "Active"; // Default status
+    $role = $_POST['role']; // Allow role selection
+    $status = $_POST['status']; // Allow status selection
+    $phone_number = htmlspecialchars(trim($_POST['phone_number'])); // Get phone number
 
     try {
         $database = new Database();
@@ -27,8 +28,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 'text' => 'An account with this email already exists!'
             ];
         } else {
-            $sql = "INSERT INTO users (full_name, email, password, role, status, created_at, updated_at)
-                    VALUES (:full_name, :email, :password, :role, :status, NOW(), NOW())";
+            $sql = "INSERT INTO users (full_name, email, password, role, status, phone_number, created_at, updated_at)
+                    VALUES (:full_name, :email, :password, :role, :status, :phone_number, NOW(), NOW())";
 
             $stmt = $conn->prepare($sql);
             $stmt->bindParam(':full_name', $full_name);
@@ -36,6 +37,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bindParam(':password', $password);
             $stmt->bindParam(':role', $role);
             $stmt->bindParam(':status', $status);
+            $stmt->bindParam(':phone_number', $phone_number); // Bind phone number
+
             $stmt->execute();
 
             $swal = [
@@ -67,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container mt-3">
         <h2 class="text-center mb-4">Create Admin</h2>
 
-        <form method="POST" action="createAdmin.php" class="card p-3 shadow">
+        <form method="POST" action="CreateAdmin.php" class="card p-3 shadow">
             <div class="mb-3">
                 <label for="full_name" class="form-label">Full Name:</label>
                 <input type="text" class="form-control" name="full_name" id="full_name" required>
@@ -83,9 +86,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <input type="password" class="form-control" name="password" id="password" required>
             </div>
 
-            <!-- Hidden fields -->
-            <input type="hidden" name="role" value="Admin">
-            <input type="hidden" name="status" value="Active">
+            <div class="mb-3">
+                <label for="phone_number" class="form-label">Phone Number:</label>
+                <input type="text" class="form-control" name="phone_number" id="phone_number" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="role" class="form-label">Role</label>
+                <select class="form-select" name="role" id="role" required>
+                    <option value="Admin">Admin</option>
+                    <option value="User">User</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" name="status" id="status" required>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
 
             <div class="d-grid">
                 <button type="submit" class="btn btn-primary">Create Admin</button>
@@ -101,6 +121,10 @@ Swal.fire({
     title: '<?= $swal['title'] ?>',
     text: '<?= $swal['text'] ?>',
     confirmButtonColor: '#3085d6'
+}).then((result) => {
+    if (result.isConfirmed && '<?= $swal['icon'] ?>' === 'success') {
+        window.location.href = 'Dashboardforcreate.php'; // Change this to your target page after success
+    }
 });
 </script>
 <?php endif; ?>

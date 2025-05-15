@@ -111,7 +111,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Super-admin') {
                     <div class="card-body">
                         <h5 class="card-title">Application</h5>
                         <p class="card-text">Total Number of Applications.</p>
-                        <a href="#" class="btn btn-light btn-sm">View</a>
+                        <a href="viewapplications.php" class="btn btn-light btn-sm">View</a>
                     </div>
                 </div>
             </div>

@@ -1,6 +1,8 @@
 <?php
 require_once '../Database/database.php';
 
+$swal = null;
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $full_name = htmlspecialchars(trim($_POST['full_name']));
     $email = htmlspecialchars(trim($_POST['email']));
@@ -20,7 +22,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $checkStmt->execute();
 
         if ($checkStmt->rowCount() > 0) {
-            $message = '<div class="alert alert-danger text-center mt-4">Error: Email already exists!</div>';
+            $swal = [
+                'icon' => 'error',
+                'title' => 'Email Exists',
+                'text' => 'The email address is already registered.'
+            ];
         } else {
             // Insert new HR user
             $sql = "INSERT INTO users (full_name, email, password, phone_number, role, status, created_at, updated_at)
@@ -35,10 +41,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bindParam(':status', $status);
             $stmt->execute();
 
-            $message = '<div class="alert alert-success text-center mt-4">HR account created successfully!</div>';
+            $swal = [
+                'icon' => 'success',
+                'title' => 'Success',
+                'text' => 'HR account created successfully!'
+            ];
         }
     } catch (PDOException $e) {
-        $message = '<div class="alert alert-danger text-center mt-4">Error: ' . $e->getMessage() . '</div>';
+        $swal = [
+            'icon' => 'error',
+            'title' => 'Database Error',
+            'text' => $e->getMessage()
+        ];
     }
 }
 ?>
@@ -49,17 +63,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <title>Create HR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<style>
-    body {
-        
-    }
-</style>
-<body class="d-flex justify-content-center align-items-center">
+<body class="d-flex justify-content-center align-items-center vh-100">
 <div class="card p-4 shadow rounded-4" style="min-width: 350px;">
     <div class="container mt-3">
         <h2 class="text-center mb-4">Create HR</h2>
-        <?php if (isset($message)) echo $message; ?>
 
         <form method="POST" action="createHR.php" class="card p-3 shadow">
             <div class="mb-3">
@@ -102,6 +111,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </form>
     </div>
 </div>
+
+<!-- SweetAlert Display -->
+<?php if ($swal): ?>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const swalIcon = <?= json_encode($swal['icon']) ?>;
+        const swalTitle = <?= json_encode($swal['title']) ?>;
+        const swalText = <?= json_encode($swal['text']) ?>;
+
+        Swal.fire({
+            icon: swalIcon,
+            title: swalTitle,
+            text: swalText,
+            confirmButtonColor: '#3085d6'
+        }).then((result) => {
+            if (result.isConfirmed && swalIcon === 'success') {
+                window.location.href = 'Dashboardforcreate.php';
+            }
+        });
+    });
+</script>
+<?php endif; ?>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
