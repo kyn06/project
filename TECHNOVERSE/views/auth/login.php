@@ -95,7 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .register-container {
             display: flex;
-            justify-content: center; 
+            flex-direction: column; 
+            align-items: center;     
             margin-top: 20px;
             font-size: 14px;
         }
@@ -164,7 +165,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <div class="register-container">
             <p>Don't have an account? <a href="../auth/register.php">Register now</a></p>
-            <br>
             <p>Don't have an HR account? <a href="registersuperads.php">Register now</a></p>
         </div>
     </div>
