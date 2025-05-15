@@ -1,7 +1,7 @@
-<!-- Bootstrap 5.3.3 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous"></script>
+<!-- Bootstrap 5.3.5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
+        integrity="sha384-QDgHE7vlnMAvV+f24TUNvo5iJ2Bs8LwM5Wm5jK0bV7RbBKMF6Z5b9cW1qapdLda8" 
+        crossorigin="anonymous"></script>
 <!-- jQuery -->
 <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.5.1.js"></script>
 <!-- Datatables JS -->

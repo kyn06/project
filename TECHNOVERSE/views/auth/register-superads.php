@@ -1,46 +1,44 @@
 <?php
-require_once '../config/database.php';
+session_start();
+include '../layouts/header.php';
+require '../../config/database.php';
+require '../../models/User.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $full_name = htmlspecialchars(trim($_POST['full_name']));
-    $email = htmlspecialchars(trim($_POST['email']));
-    $password = password_hash(trim($_POST['password']), PASSWORD_DEFAULT);
-    $phone_number = htmlspecialchars(trim($_POST['phone_number']));
-    $role = htmlspecialchars(trim($_POST['role']));
-    $status = htmlspecialchars(trim($_POST['status']));
+$db = new Database();
+User ::setConnection($db->getConnection());
+$userController = new User();
 
-    try {
-        $database = new Database();
-        $conn = $database->getConnection();
+$message = ''; // Initialize message variable
 
-        // Check if the email already exists
-        $checkSql = "SELECT id FROM users WHERE email = :email";
-        $checkStmt = $conn->prepare($checkSql);
-        $checkStmt->bindParam(':email', $email);
-        $checkStmt->execute();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $allowed_roles = ['Super-admin', 'Admin', 'Job-seeker'];
+    
+    $existingUser  = User::findByEmail($_POST['email']);
+    if ($existingUser ) {
+        $message = '<div class="alert alert-danger text-center mt-4">Error! Email is already taken.</div>';
+    } else {
+        $userData = [
+            'full_name' => $_POST['full_name'],
+            'email' => $_POST['email'],
+            'password' => password_hash($_POST['password'], PASSWORD_DEFAULT),
+            'phone_number' => $_POST['phone_number'],
+            'role' => $_POST['role'],
+            'status' => 'active',
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
 
-        if ($checkStmt->rowCount() > 0) {
-            $message = '<div class="alert alert-danger text-center mt-4">Error: Email already exists!</div>';
+        if (!in_array($userData['role'], $allowed_roles)) {
+            $message = '<div class="alert alert-danger text-center mt-4">Error! Invalid role selected.</div>';
         } else {
-            // Insert new user
-            $sql = "INSERT INTO users (full_name, email, password, phone_number, role, status, created_at, updated_at)
-                    VALUES (:full_name, :email, :password, :phone_number, :role, :status, NOW(), NOW())";
+            $newUser  = User::create($userData);
 
-            $stmt = $conn->prepare($sql);
-
-            $stmt->bindParam(':full_name', $full_name);
-            $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':password', $password);
-            $stmt->bindParam(':phone_number', $phone_number);
-            $stmt->bindParam(':role', $role);
-            $stmt->bindParam(':status', $status);
-
-            $stmt->execute();
-
-            $message = '<div class="alert alert-success text-center mt-4">Registration successful!</div>';
+            if ($newUser ) {
+                $message = '<div class="alert alert-success text-center mt-4">Success! User has been created.</div>';
+            } else {
+                $message = '<div class="alert alert-danger text-center mt-4">Error! Failed to create user, try again.</div>';
+            }
         }
-    } catch (PDOException $e) {
-        $message = '<div class="alert alert-danger text-center mt-4">Error: ' . $e->getMessage() . '</div>';
     }
 }
 ?>
@@ -52,9 +50,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register User</title>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
 </head>
 <style>
     body{
@@ -120,7 +115,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </form>
 </div>
 
-<!-- Bootstrap JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-QDgHE7vlnMAvV+f24TUNvo5iJ2Bs8LwM5Wm5jK0bV7RbBKMF6Z5b9cW1qapdLda8" crossorigin="anonymous"></script>
+
+<?php require_once '../layouts/footer.php'; ?>
 </body>
 </html>
