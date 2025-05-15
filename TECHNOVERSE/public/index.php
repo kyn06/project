@@ -1,11 +1,11 @@
 <?php
 session_start();
-require_once 'Models/Users.php';
-require_once 'database/database.php';
-
+require_once '../../models/User.php';
+require_once '../../config/database.php';
+ 
 // Redirect to login if not logged in
 if (!isset($_SESSION['email'])) {
-    header("Location: authentication/login.php");
+    header("Location: ../../auth/login.php");
     exit();
 }
 
@@ -110,7 +110,7 @@ include User::getNavbarFile();
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <?php if (count($jobs) > 0): ?>
         <?php foreach ($jobs as $job): ?>
-          <a href="Application/apply.php?id=<?php echo $job['id']; ?>" class="block">
+          <a href="../../jobseeker/js-apply.php?id=<?php echo $job['id']; ?>" class="block">
             <div class="bg-white rounded-xl shadow p-4">
               <h3 class="text-lg font-bold mb-1"><?php echo htmlspecialchars($job['job_title']); ?></h3>
               <p class="text-sm text-gray-600 mb-2"><?php echo htmlspecialchars($job['job_type']); ?></p>

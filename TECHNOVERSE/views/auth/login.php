@@ -150,8 +150,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <div class="login-wrapper">
              <h1><span style="color: #4f48ec;"><b>Techno</span>verse</b></h1>
     <div class="login-left">
-        
-        <!-- Message Container -->
         <div class="message-container">
             <h2><strong>Welcome back!</strong></h2>
             <p class="des">Track jobs, stay updated, and grow your career —<br>all in one place with <strong>Technoverse</strong>.</p>
@@ -166,6 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <div class="register-container">
             <p>Don't have an account? <a href="../auth/register.php">Register now</a></p>
+            <p>Don't have an HR account? <a href="registersuperads.php">Register now</a></p>
         </div>
     </div>
 
@@ -188,6 +187,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </script>
 <?php endif; ?>
 
+<?php if (isset($_GET['registered']) && $_GET['registered'] === 'success') : ?>
+<script>
+    window.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'success',
+            title: 'Registration Successful',
+            text: 'Your account has been created. Please log in!',
+            confirmButtonColor: '#0f1035'
+        });
+    });
+</script>
+<?php endif; ?>
 
 <?php require_once '../views/layouts/footer.php'; ?>
 
