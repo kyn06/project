@@ -93,7 +93,7 @@ class JobPost extends Model {
     }
 
     public function getJobPosts() {
-        return self::fetchJobPostings();
+        return $this->fetchJobPostings();
     }
-
+    
 }

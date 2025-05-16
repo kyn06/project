@@ -83,6 +83,20 @@ class Application extends Model {
         }
     }
 
+    public static function applyJob($userId, $jobId, $letter) {
+        $application = new self([
+            'user_id' => $userId,
+            'job_posting_id' => $jobId,
+            'application_date' => date('Y-m-d'),
+            'status_id' => 1,
+            'letter' => $letter,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+        return $application->save();
+    }
+    
+
     public static function getApplications() {
         return self::getJoinedData([
             'users u' => 'a.user_id = u.id',
@@ -91,12 +105,19 @@ class Application extends Model {
         ], 'a.application_date DESC');
     }
 
-    public static function getApplicationStatusByUserId($userId) {
-        return self::getByColumn('user_id', $userId, [
-            'users u' => 'a.user_id = u.id',
-            'job_postings jp' => 'a.job_posting_id = jp.id',
-            'statuses s' => 'a.status_id = s.id',
-        ]);
+    public static function getApplicationStatusByEmail($email) {
+        return self::getByConditions(
+            [
+                ['u.email', '=', $email],
+                // Add more conditions if needed
+            ],
+            [
+                'users u' => 'a.user_id = u.id',
+                'job_postings jp' => 'a.job_posting_id = jp.id',
+                'statuses s' => 'a.status_id = s.id',
+            ],
+            'a.application_date DESC'
+        );
     }
 
     public static function fetchApplicationStatsByLabel(): array {

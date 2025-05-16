@@ -174,7 +174,7 @@ class Model {
         }
     }
 
-    public static function getByColumn(string $column, $value, array $joins = [], string $orderBy = '') {
+    public static function getByConditions(array $conditions = [], array $joins = [], string $orderBy = '') {
         try {
             $tableAlias = 'a';
             $sql = "SELECT $tableAlias.*, ";
@@ -191,16 +191,29 @@ class Model {
                 $sql .= "JOIN $joinTable ON $onCondition ";
             }
 
-            $sql .= " WHERE $tableAlias.$column = :value ";
+            if (!empty($conditions)) {
+                $sql .= " WHERE ";
+                $whereClauses = [];
+                foreach ($conditions as $index => $condition) {
+                    [$column, $operator, $value] = $condition;
+                    $param = ":value$index";
+                    $whereClauses[] = "$column $operator $param";
+                }
+                $sql .= implode(' AND ', $whereClauses);
+            }
 
             if ($orderBy) {
-                $sql .= "ORDER BY $orderBy";
+                $sql .= " ORDER BY $orderBy";
             }
 
             $stmt = self::$conn->prepare($sql);
-            $stmt->bindValue(':value', $value);
+            foreach ($conditions as $index => $condition) {
+                $stmt->bindValue(":value$index", $condition[2]);
+            }
+
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_OBJ) ?: [];
+
         } catch (PDOException $e) {
             die("Query failed: " . $e->getMessage());
         }

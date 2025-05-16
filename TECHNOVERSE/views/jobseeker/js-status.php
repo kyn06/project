@@ -1,23 +1,30 @@
 <?php
 session_start();
-require_once '../database/database.php';
-require_once '../Models/Users.php';
-include '../navbarforjobseeker.php'; // Include the navbar
-// Auth check: Must be logged in and a job-seeker
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Job-seeker') {
-    header("Location: ../error/error404.php");
-    exit;
+require_once '../../config/database.php';
+require_once '../../models/Application.php';
+include 'navbar-js.php'; 
+
+// Redirect to login if not logged in
+if (!isset($_SESSION['email'])) {
+    header("Location: ../auth/login.php");
+    exit();
 }
 
+// Only allow Job-seeker role
+if ($_SESSION['role'] !== 'Job-seeker') {
+    header("Location: ../errors/error.php");
+    exit();
+}
 
 $db = new Database();
 $conn = $db->getConnection();
 
-$userId = $_SESSION['user_id'];
+$email = $_SESSION['email'];
 
-User::setConnection($conn);
-$appModel = new User();
-$applications = $appModel->getApplicationStatusByUserId($userId);
+Application::setConnection($conn);
+$appModel = new Application();
+$applications = $appModel::getApplicationStatusByEmail($email);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,7 +58,6 @@ $applications = $appModel->getApplicationStatusByUserId($userId);
                         <td><?= htmlspecialchars($app['job_title'] ?? 'N/A') ?></td>
                         <td><?= htmlspecialchars($app['application_date']) ?></td>
                         <td><?= htmlspecialchars($app['status_label'] ?? 'Pending') ?></td>
-                        
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -61,7 +67,7 @@ $applications = $appModel->getApplicationStatusByUserId($userId);
     <?php endif; ?>
 
     <div class="text-center mt-3">
-        <a href="../index.php" class="btn btn-secondary">Back to Dashboard</a>
+        <a href="../../public/index.php" class="btn btn-secondary">Back to Dashboard</a>
     </div>
 </div>
 </body>
