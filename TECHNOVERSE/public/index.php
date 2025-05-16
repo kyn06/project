@@ -88,19 +88,19 @@ include User::getNavbarFile();
   <!-- Overview Cards -->
   <div class="px-6 sm:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
     <div class="bg-green-400 rounded-xl text-white p-6 shadow">
-      <div class="text-3xl font-bold"><?php echo $totalApplications; ?></div>
+      <div class="text-3xl font-bold"><?php echo isset($totalApplicants) ? $totalApplicants : 0; ?></div>
       <div class="text-base mt-2">Applicants</div>
     </div>
     <div class="bg-indigo-500 rounded-xl text-white p-6 shadow">
-      <div class="text-3xl font-bold"><?php echo $complete; ?></div>
+      <div class="text-3xl font-bold"><?php echo isset($complete) ? $complete : 0; ?></div>
       <div class="text-base mt-2">Complete</div>
     </div>
     <div class="bg-gray-900 rounded-xl text-white p-6 shadow">
-      <div class="text-3xl font-bold"><?php echo $inprogress; ?></div>
+      <div class="text-3xl font-bold"><?php echo isset($inprogress) ? $inprogress : 0; ?></div>
       <div class="text-base mt-2">In-progress</div>
     </div>
     <div class="bg-red-500 rounded-xl text-white p-6 shadow">
-      <div class="text-3xl font-bold"><?php echo $rejected; ?></div>
+      <div class="text-3xl font-bold"><?php echo isset($rejected) ? $rejected : 0; ?></div>
       <div class="text-base mt-2">Rejected</div>
     </div>
   </div>
@@ -113,9 +113,9 @@ include User::getNavbarFile();
         <?php foreach ($jobs as $job): ?>
           <a href="../../jobseeker/js-apply.php?id=<?php echo $job['id']; ?>" class="block">
             <div class="bg-white rounded-xl shadow p-4">
-              <h3 class="text-lg font-bold mb-1"><?php echo htmlspecialchars($job['job_title']); ?></h3>
-              <p class="text-sm text-gray-600 mb-2"><?php echo htmlspecialchars($job['job_type']); ?></p>
-              <p class="text-sm"><?php echo nl2br(htmlspecialchars(substr($job['job_description'], 0, 100))) . '...'; ?></p>
+              <h3 class="text-lg font-bold mb-1"><?php echo $job['job_title']; ?></h3>
+              <p class="text-sm text-gray-600 mb-2"><?php echo $job['job_type']; ?></p>
+              <p class="text-sm"><?php echo nl2br(substr($job['job_description'], 0, 100)) . '...'; ?></p>
               <p class="text-xs text-gray-400 mt-3">Posted at: <?php echo date("F j, Y", strtotime($job['posted_at'])); ?></p>
               <?php if ($role === 'Job-seeker'): ?>
                 <div class="mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
