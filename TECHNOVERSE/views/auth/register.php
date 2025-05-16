@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'email' => $_POST['email'],
             'password' => password_hash($_POST['password'], PASSWORD_DEFAULT),
             'phone_number' => $_POST['phone_number'],
-            'role' => $_POST['role'],
+            'role' => 'Job-seeker',
             'status' => 'active',
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s')
@@ -34,9 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $newUser  = User::create($userData);
 
             if ($newUser ) {
-                $message = '<div class="alert alert-success text-center mt-4">Success! User has been created.</div>';
+                $message = '<div class="alert alert-success text-center mt-1">Success! User has been created.</div>';
             } else {
-                $message = '<div class="alert alert-danger text-center mt-4">Error! Failed to create user, try again.</div>';
+                $message = '<div class="alert alert-danger text-center mt-1">Error! Failed to create user, try again.</div>';
             }
         }
     }
@@ -181,6 +181,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="register-left">
     <h2 align="center">Create Account</h2>
     <p align="center" class="des">Create your profile and apply with ease.</p>
+
+    <?php if (!empty($message)) echo $message; ?>
 
     <form method="POST" action="register.php" class="register-form">
       <input type="text" name="full_name" placeholder="Full Name" required>

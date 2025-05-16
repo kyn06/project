@@ -66,12 +66,12 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Job-seeker') {
     </div>
     <div class="offcanvas-body p-0">
         <ul class="list-unstyled">
-            <li><a href="../index.php" class="sidebar-link">🏠 HOME</a></li> <br>
-            <li><a href="Application/JobSeekerStatus.php" class="sidebar-link">🔍 View Application Status</a></li><br>
-            <li><a href="apply_for_jobs.php" class="sidebar-link">📝 Apply for Jobs</a></li><br>
-            <li><a href="profile.php" class="sidebar-link">👤 Profile</a></li><br>
-            <li><a href="about.php" class="sidebar-link">🔎 ABOUT</a></li><br>
-            <li><a href="/JOB_APPLICATION_TRACKER/authentication/logout.php" class="sidebar-link"> <strong> LOGOUT </strong></a></li> <br>
+            <li><a href="../views/jobseeker/js-home.php" class="sidebar-link">🏠 HOME</a></li> <br>
+            <li><a href="../views/jobseeker/js-status.php" class="sidebar-link">🔍 View Application Status</a></li><br>
+            <li><a href="../views/jobseeker/js-apply.php" class="sidebar-link">📝 Apply for Jobs</a></li><br>
+            <li><a href="#" class="sidebar-link">👤 Profile</a></li><br>
+            <li><a href="#" class="sidebar-link">🔎 ABOUT</a></li><br>
+            <li><a href="../views/auth/logout.php" class="sidebar-link"> <strong> LOGOUT </strong></a></li> <br>
         </ul>
     </div>
 </div>

@@ -1,7 +1,7 @@
-<!-- sidebar.php -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+<?php 
 
+require_once 'header.php';
+require_once 'footer.php';
 <style>
     body {
         margin: 0;
@@ -56,13 +56,11 @@
     </div>
     <div class="offcanvas-body p-0">
         <ul class="list-unstyled">
-            <li><a href="index.php" class="sidebar-link">🏠 HOME</a></li> <br>
-            <li><a href="/JOB_APPLICATION_TRACKER/Superadmin/Superadminindex.php" class="sidebar-link">⚒ USER ENGAGEMENT</a></li><br>
-            <li><a href="/JOB_APPLICATION_TRACKER/HRDb/HRCreateJobPost.php" class="sidebar-link">⚒ HR</a></li><br>
-            <li><a href="index.php" class="sidebar-link">🔎 ABOUT</a></li> <br>
-            <li><a href="/JOB_APPLICATION_TRACKER/authentication/logout.php" class="sidebar-link"> <strong> LOGOUT </strong></a></li> <br>
-            
-
+            <li><a href="/project/TECHNOVERSE/public/index.php" class="sidebar-link">🏠 HOME</a></li> <br>
+            <li><a href="/project/TECHNOVERSE/views/superadmin/superadmin-index.php" class="sidebar-link">⚒ USER ENGAGEMENT</a></li><br>
+            <li><a href="/project/TECHNOVERSE/views/hr/hr-create-job-post.php" class="sidebar-link">⚒ HR</a></li><br>
+            <li><a href="/project/TECHNOVERSE/public/index.php" class="sidebar-link">🔎 ABOUT</a></li> <br>
+            <li><a href="/project/TECHNOVERSE/views/auth/logout.php" class="sidebar-link"><strong> LOGOUT </strong></a></li> <br>
         </ul>
     </div>
 </div>

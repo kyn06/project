@@ -135,7 +135,7 @@ h2{
                 <li><a href="#about">About</a></li>
                 <li><a href="#contact">Contact Us</a></li>
                 <div class="login">
-                <li><a href="authentication/login.php" style="color: #ffffff;">Login</a></li>
+                <li><a href="../views/auth/login.php" style="color: #ffffff;">Login</a></li>
                 </div>
             </ul>
         </nav>
