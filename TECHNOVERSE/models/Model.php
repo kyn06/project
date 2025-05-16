@@ -84,14 +84,16 @@ class Model {
         }
     }
 
-    protected static function countAll() {
+    protected static function countAll(): int {
         try {
-            $query = "SELECT COUNT(*) as total FROM " . static::$table;
-            $stmt = self::$conn->query($query);
-            $row = $stmt->fetch();
-            return $row['total'];
+            $sql = "SELECT COUNT(*) as total FROM " . static::$table;
+            $stmt = self::$conn->prepare($sql);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row['total'] ?? 0;
         } catch (PDOException $e) {
-            die("Query failed: " . $e->getMessage());
+            error_log("Error counting records: " . $e->getMessage());
+            return 0;
         }
     }
 
@@ -141,4 +143,85 @@ class Model {
             die("Error fetching data: " . $e->getMessage());
         }
     }
+
+    public static function getJoinedData(array $joins = [], string $orderBy = '') {
+        try {
+            $tableAlias = 'a';
+            $sql = "SELECT $tableAlias.*, ";
+
+            foreach ($joins as $alias => $on) {
+                $aliasName = explode(' ', $alias)[1] ?? $alias; 
+                $sql .= "$aliasName.*, ";
+            }
+
+            $sql = rtrim($sql, ", ");
+
+            $sql .= " FROM " . static::$table . " $tableAlias ";
+
+            foreach ($joins as $joinTable => $onCondition) {
+                $sql .= "JOIN $joinTable ON $onCondition ";
+            }
+
+            if ($orderBy) {
+                $sql .= "ORDER BY $orderBy";
+            }
+
+            $stmt = self::$conn->query($sql);
+            $rows = $stmt->fetchAll(PDO::FETCH_OBJ);
+            return $rows ?: [];
+        } catch (PDOException $e) {
+            die("Query failed: " . $e->getMessage());
+        }
+    }
+
+    public static function getByColumn(string $column, $value, array $joins = [], string $orderBy = '') {
+        try {
+            $tableAlias = 'a';
+            $sql = "SELECT $tableAlias.*, ";
+
+            foreach ($joins as $alias => $on) {
+                $aliasName = explode(' ', $alias)[1] ?? $alias;
+                $sql .= "$aliasName.*, ";
+            }
+            $sql = rtrim($sql, ", ");
+
+            $sql .= " FROM " . static::$table . " $tableAlias ";
+
+            foreach ($joins as $joinTable => $onCondition) {
+                $sql .= "JOIN $joinTable ON $onCondition ";
+            }
+
+            $sql .= " WHERE $tableAlias.$column = :value ";
+
+            if ($orderBy) {
+                $sql .= "ORDER BY $orderBy";
+            }
+
+            $stmt = self::$conn->prepare($sql);
+            $stmt->bindValue(':value', $value);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_OBJ) ?: [];
+        } catch (PDOException $e) {
+            die("Query failed: " . $e->getMessage());
+        }
+    }
+
+    public static function fetchStats(array $statusValues) {
+        // statusValues = ['complete' => 2, 'inprogress' => 1, 'rejected' => 3]
+        try {
+            $selects = ["COUNT(*) AS total"];
+            foreach ($statusValues as $key => $val) {
+                $selects[] = "SUM(status_id = '$val') AS $key";
+            }
+            $sql = "SELECT " . implode(", ", $selects) . " FROM " . static::$table;
+            $stmt = self::$conn->prepare($sql);
+            $stmt->execute();
+            $stats = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $stats ?: array_fill_keys(array_merge(['total'], array_keys($statusValues)), 0);
+        } catch (PDOException $e) {
+            error_log("Error fetching stats: " . $e->getMessage());
+            return array_fill_keys(array_merge(['total'], array_keys($statusValues)), 0);
+        }
+    }
+
 }
