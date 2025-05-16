@@ -140,9 +140,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 14.2px;
         }
         .character-image {
+            margin-top: 20px;
             width: 100%; 
             height: auto; 
-            max-width: 600px; 
+            max-width: 402px; 
         }
     </style>
 </head>
@@ -171,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <!-- RIGHT SIDE: Image -->
     <div class="login-right">
-        <img src="../../public/assets/images/logo.png" alt="Character with Laptop" class="character-image">
+        <img src="../../public/assets/images/login-bg.png" alt="Character with Laptop" class="character-image">
     </div>
 </div>
 
@@ -201,7 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </script>
 <?php endif; ?>
 
-<?php require_once '../views/layouts/footer.php'; ?>
+<?php require_once '../layouts/footer.php'; ?>
 
 </body>
 </html>

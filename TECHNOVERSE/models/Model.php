@@ -223,5 +223,16 @@ class Model {
             return array_fill_keys(array_merge(['total'], array_keys($statusValues)), 0);
         }
     }
+    
+    public function fetchJobPostings(): array {
+        try {
+            $stmt = self::$conn->prepare("SELECT * FROM job_postings ORDER BY posted_at DESC");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error retrieving jobs: " . $e->getMessage());
+            return [];
+        }
+    }
 
 }
