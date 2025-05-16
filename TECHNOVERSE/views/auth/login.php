@@ -165,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <div class="register-container">
             <p>Don't have an account? <a href="../auth/register.php">Register now</a></p>
-            <p>Don't have an HR account? <a href="registersuperads.php">Register now</a></p>
+            <p>Don't have an HR account? <a href="register-superads.php">Register now</a></p>
         </div>
     </div>
 
