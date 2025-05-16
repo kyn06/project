@@ -1,7 +1,8 @@
 <?php
 session_start();
-require_once '../../models/User.php';
-require_once '../../config/database.php';
+require_once '../models/Application.php';
+require_once '../models/User.php';
+require_once '../config/database.php';
  
 // Redirect to login if not logged in
 if (!isset($_SESSION['email'])) {
@@ -15,23 +16,23 @@ $role = $_SESSION['role'] ?? 'Not Assigned';
 // Set up database connection
 $db = new Database();
 $conn = $db->getConnection();
-User::setConnection($conn);
+Application::setConnection($conn);
 
-// Create User object
-$userModel = new User();
+// Create Application object
+$applicationModel = new Application();
 
 // Get job postings
-$jobs = $userModel->fetchJobPostings();
+$jobs = $applicationModel->getApplications();
 
 // Get application stats
-$stats = $userModel->fetchApplicationStatsByLabel();
+$stats = $applicationModel->fetchApplicationStatsByLabel();
 $totalApplicants = $stats['total'];
 $complete = $stats['complete'];
 $inprogress = $stats['inprogress'];
 $rejected = $stats['rejected'];
 
 // Get total applications
-$totalApplications = $userModel->fetchTotalApplications();
+$totalApplications = $applicationModel->fetchTotalApplications();
 
 // Include appropriate navbar
 include User::getNavbarFile();

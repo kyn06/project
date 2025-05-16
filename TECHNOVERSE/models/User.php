@@ -221,7 +221,7 @@ class User extends Model {
             'Job-seeker' => '../views/jobseeker/navbar-js.php',
             'Super Admin' => '../views/superadmin/navbar-superadmin.php',
             'HR' => '../views/hr/navbar-hr.php',
-            default => '../views/layout/navbar.php',
+            default => '../views/layouts/navbar.php',
         };
     }
 }
