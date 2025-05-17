@@ -58,6 +58,7 @@ class User extends Model {
             $_SESSION['user_id'] = $user->id;
             $_SESSION['email'] = $user->email;
             $_SESSION['role'] = $user->role;
+            $_SESSION['full_name'] = $user['full_name'];
             return true;
         }
 

@@ -1,54 +1,61 @@
 <?php
-// HR.php - Handles Create Company Logic
 session_start();
+require_once '../../config/database.php';
+require_once '../../models/Company.php';
+require_once '../../models/User.php';
+
+// Set up DB connection and bind to models
+$db = new Database();
+$conn = $db->getConnection();
+
+Company::setConnection($conn);
+User::setConnection($conn);
+
+$user = User::find($_SESSION['user_id']);
+$username = $user ? $user->getUserName() : 'Guest';
 
 // Redirect if not logged in or not HR
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'HR') {
-    header("Location: authentication/login.php");
+    header("Location: ../../views/auth/login.php");
     exit;
 }
 
-require_once '../Database/database.php';
 $swal = null;
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = htmlspecialchars(trim($_POST['name']));
-    $about = htmlspecialchars(trim($_POST['about']));
-    $address = htmlspecialchars(trim($_POST['address']));
-    $contact_number = htmlspecialchars(trim($_POST['contact_number']));
-    $company_size = htmlspecialchars(trim($_POST['company_size']));
-    $field = htmlspecialchars(trim($_POST['field']));
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $companyData = [
+        'name' => trim($_POST['name']),
+        'about' => trim($_POST['about']),
+        'address' => trim($_POST['address']),
+        'contact_no' => trim($_POST['contact_no']),
+        'company_size' => trim($_POST['company_size']),
+        'field' => trim($_POST['field']),
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
 
     try {
-        $database = new Database();
-        $conn = $database->getConnection();
+        $company = Company::create($companyData);
 
-        $sql = "INSERT INTO companies 
-                (name, about, address, contact_number, company_size, field, created_at, updated_at)
-                VALUES 
-                (:name, :about, :address, :contact_number, :company_size, :field, NOW(), NOW())";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            ':name' => $name,
-            ':about' => $about,
-            ':address' => $address,
-            ':contact_number' => $contact_number,
-            ':company_size' => $company_size,
-            ':field' => $field
-        ]);
-
-        $swal = [
-            'icon' => 'success',
-            'title' => 'Company Created!',
-            'text' => 'The company has been added successfully.'
-        ];
-    } catch (PDOException $e) {
-        error_log("Insert error: " . $e->getMessage());
+        if ($company) {
+            $swal = [
+                'icon' => 'success',
+                'title' => 'Company Created!',
+                'text' => 'The company has been added successfully.'
+            ];
+        } else {
+            $swal = [
+                'icon' => 'error',
+                'title' => 'Creation Failed',
+                'text' => 'Could not create the company.'
+            ];
+        }
+    } catch (Exception $e) {
+        error_log("Company creation error: " . $e->getMessage());
         $swal = [
             'icon' => 'error',
             'title' => 'Database Error',
-            'text' => 'An error occurred while saving the company.'
+            'text' => 'An unexpected error occurred.'
         ];
     }
 }
@@ -71,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Create Company</a>
             <span class="navbar-text text-white">
-                Welcome, <?= htmlspecialchars($_SESSION['full_name']) ?>!
+                Welcome, <?= $username ?>!
             </span>
         </div>
     </nav>
@@ -94,7 +101,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
                 <div class="mb-3">
                     <label for="contact_number" class="form-label">Contact Number</label>
-                    <input type="text" class="form-control" name="contact_number" id="contact_number" required>
+                    <input type="text" class="form-control" name="contact_no" id="contact_number" required>
                 </div>
                 <div class="mb-3">
                     <label for="company_size" class="form-label">Company Size</label>

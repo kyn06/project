@@ -2,7 +2,7 @@
 
 require_once 'Model.php';
 
-class Company extends Model {}
+class Company extends Model {
     protected static $table = 'companies';
 
     private $id;
