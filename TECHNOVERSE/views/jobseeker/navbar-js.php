@@ -98,6 +98,19 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Job-seeker') {
     </div>
 </nav>
 
+<!-- Fixed Sidebar (visible on md and up) -->
+<div class="fixed-sidebar d-none d-md-block" id="sidebarMenu">
+    <a href="index.php" class="logo"><span class="logo1">Techno</span>verse</a>
+    <ul class="list-unstyled mt-4">
+        <li><a href="../views/jobseeker/js-home.php" class="sidebar-link"><i class="fas fa-home me-2"></i>Home</a></li>
+        <li><a href="../views/jobseeker/js-status.php" class="sidebar-link"><i class="fas fa-clipboard-list me-2"></i>Job Listings</a></li>
+        <li><a href="../views/jobseeker/js-apply.php" class="sidebar-link"><i class="fas fa-file-signature me-2"></i>My Applications</a></li>
+        <li><a href="#" class="sidebar-link"><i class="fas fa-user me-2"></i>Profile</a></li>
+        <li><a href="#" class="sidebar-link"><i class="fas fa-info-circle me-2"></i>About</a></li>
+        <li><a href="../views/auth/logout.php" class="sidebar-link" style="color: #ff1d1d;"><i class="fas fa-sign-out-alt me-2"></i><strong>Logout</strong></a></li>
+    </ul>
+</div>
+
 <!-- Offcanvas Sidebar (for small screens) -->
 <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="offcanvasMenu">
     <div class="offcanvas-header">

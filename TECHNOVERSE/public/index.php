@@ -6,7 +6,7 @@ require_once '../config/database.php';
  
 // Redirect to login if not logged in
 if (!isset($_SESSION['email'])) {
-    header("Location: ../../auth/login.php");
+    header("Location: ../views/auth/login.php");
     exit();
 }
 

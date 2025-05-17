@@ -80,6 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_job_id'])) {
         <?php endforeach; ?>
     <?php else: ?>
         <p class="text-center">No job postings available at this time.</p>
+        <p class="text-center"> Go back to <a href="js-home.php">Home</a></p>
     <?php endif; ?>
 </div>
 
