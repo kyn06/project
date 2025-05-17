@@ -49,7 +49,7 @@ include User::getNavbarFile();
 <body class="bg-cream text-gray-800 font-[Helvetica]">
 
   <!-- Top Bar -->
-  <div class="flex justify-between items-center p-6 bg-white shadow">
+  <div class="flex justify-between items-center p-6 bg-white shadow rounded-2xl">
     <div>
       <h1 class="text-3xl font-bold">Dashboard</h1>
       <p class="text-sm text-gray-500"><?php echo date("l, F j, Y"); ?></p>

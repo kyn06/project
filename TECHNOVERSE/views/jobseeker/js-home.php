@@ -5,6 +5,7 @@
     max-width: 1300px;
     margin: 0 auto;
 }
+
 body {
     font-family: 'Helvetica', sans-serif;
     margin: 0;
@@ -12,7 +13,7 @@ body {
 }
 
 header {
-    background-color: #fff;
+    background-color: #fffff;
     padding: 20px;
 }
 
