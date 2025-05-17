@@ -1,5 +1,7 @@
 <?php
 session_start();
+require_once '../../config/database.php';
+require_once '../../models/User.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -7,6 +9,16 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: authentication/login.php");
     exit;
 }
+
+$db = new Database();
+$conn = $db->getConnection();
+
+
+User::setConnection($conn);
+
+$user = User::find($_SESSION['user_id']);
+$username = $user ? $user->getUserName() : 'Guest';
+
 ?>
 
 <!DOCTYPE html>
@@ -76,7 +88,7 @@ if (!isset($_SESSION['user_id'])) {
 <body>
 
 <!-- Sidebar -->
-<?php include('../navbar.php'); ?>
+<?php include('navbar.php'); ?>
 
 <!-- Main Content -->
 <div class="dashboard-content">
@@ -86,7 +98,7 @@ if (!isset($_SESSION['user_id'])) {
             <a class="navbar-brand" href="#">Job Application Tracker</a>
             <div class="d-flex">
                 <span class="navbar-text me-3">
-                    Welcome, <?php echo htmlspecialchars($_SESSION['full_name']); ?>!
+                    Welcome, <?= $username ?>!
                 </span>
                 
             </div>

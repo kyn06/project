@@ -88,4 +88,20 @@ class Review extends Model {
         }
     }
 
+    public function getPendingReviewsCount()
+    {
+        $query = "SELECT COUNT(*) AS pending_reviews FROM review WHERE status = 'pending'";
+        $stmt = self::$conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC)['pending_reviews'];
+    }
+
+    public function getApprovedReviewsCount()
+    {
+        $query = "SELECT COUNT(*) AS approved_reviews FROM review WHERE status = 'approved'";
+        $stmt = self::$conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC)['approved_reviews'];
+    }
+
 }

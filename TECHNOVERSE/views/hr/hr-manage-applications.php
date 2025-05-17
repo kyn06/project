@@ -1,40 +1,38 @@
 <?php
-require_once 'database/database.php';
-require_once 'Models/Users.php'; // Make sure the path is correct
-include 'navbar.php'; // Include the navbar
+require_once '../../config/database.php';
+require_once '../../models/Application.php'; 
+include 'navbar-hr.php'; 
 
-// Simulated HR login
 $hr_id = 1;
 
 $db = new Database();
 $conn = $db->getConnection();
 
-User::setConnection($conn); // Set DB connection for the model
-$user = new User();
-$applications = $user->getApplications(); // Call getApplications from User class
+Application::setConnection($conn);
 
-// --- ✅ Handle Approve/Reject Form ---
+$applications = Application::getApplications();
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $appId = $_POST['application_id'];
-    $action = $_POST['action']; // 'approve' or 'reject'
+    $action = $_POST['action'];
 
-    $statusId = $action === 'approve' ? 2 : 3; // Status IDs
+    $statusId = $action === 'approve' ? 2 : 3;
 
-    // Update application status
-    $update = $conn->prepare("UPDATE applications SET status_id = :status_id, updated_at = NOW() WHERE id = :id");
-    $update->execute([
-        'status_id' => $statusId,
-        'id' => $appId
-    ]);
+    $application = Application::find($appId);
 
-    // Log status change
-    $history = $conn->prepare("INSERT INTO status_history (application_id, status_id, update_date) VALUES (:application_id, :status_id, NOW())");
-    $history->execute([
-        'application_id' => $appId,
-        'status_id' => $statusId
-    ]);
+    if ($application) {
+        $application->status_id = $statusId;
+        $application->updated_at = date('Y-m-d H:i:s');
+        if ($application->save()) {
+            $stmt = $conn->prepare("INSERT INTO status_history (application_id, status_id, update_date) VALUES (:application_id, :status_id, NOW())");
+            $stmt->execute([
+                'application_id' => $appId,
+                'status_id' => $statusId
+            ]);
+        }
+    }
 
-    header("Location: manage_applications.php");
+    header("Location: hr-manage-applications.php");
     exit;
 }
 ?>
@@ -61,30 +59,34 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <th>Actions</th>
                 </tr>
             </thead>
-        <tbody>
-            
-<?php foreach ($applications as $app): ?>
-    <tr>
-        <td><?= htmlspecialchars($app->full_name ?? 'N/A') ?></td>
-        <td><?= htmlspecialchars($app->job_title ?? 'N/A') ?></td>
-        <td style="max-width: 250px;"><?= nl2br(htmlspecialchars($app->letter ?? '')) ?></td>
-        <td><?= htmlspecialchars($app->application_date ?? 'N/A') ?></td>
-        <td><span class="badge bg-secondary"><?= htmlspecialchars($app->status ?? 'N/A') ?></span></td>
-        <td>
-            <?php if ($app->status === 'Submitted'): ?>
-                <form method="POST" class="d-flex gap-2">
-                    <input type="hidden" name="application_id" value="<?= $app->id ?>">
-                    <button name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-                    <button name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                </form>
-            <?php else: ?>
-                <span class="text-muted">No Action</span>
-            <?php endif ?>
-        </td>
-    </tr>
-<?php endforeach ?>
-</tbody>
-
+            <tbody>
+            <?php foreach ($applications as $app): ?>
+                <tr>
+                    <td><?= htmlspecialchars($app['full_name'] ?? 'N/A') ?></td>
+                    <td><?= htmlspecialchars($app['job_title'] ?? 'N/A') ?></td>
+                    <td style="max-width: 250px;"><?= nl2br(htmlspecialchars($app['letter'] ?? '')) ?></td>
+                    <td><?= htmlspecialchars($app['application_date'] ?? 'N/A') ?></td>
+                    <td>
+                        <span class="badge 
+                            <?= $app['status'] === 'Submitted' ? 'bg-secondary' : 
+                               ($app['status'] === 'Approved' ? 'bg-success' : 
+                               ($app['status'] === 'Rejected' ? 'bg-danger' : 'bg-secondary')) ?>">
+                            <?= htmlspecialchars($app['status'] ?? 'N/A') ?>
+                        </span>
+                    </td>
+                    <td>
+                        <?php if ($app['status'] === 'Submitted'): ?>
+                            <form method="POST" class="d-flex gap-2">
+                                <input type="hidden" name="application_id" value="<?= $app['application_id'] ?>">
+                                <button name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
+                                <button name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
+                            </form>
+                        <?php else: ?>
+                            <span class="text-muted">No Action</span>
+                        <?php endif ?>
+                    </td>
+                </tr>
+            <?php endforeach ?>
             </tbody>
         </table>
     <?php else: ?>

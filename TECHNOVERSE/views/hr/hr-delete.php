@@ -1,30 +1,32 @@
 <?php
 // Only handle deletion if confirmed via POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
-    require_once '../database/database.php';
+    require_once '../../config/database.php';
+    require_once '../../models/JobPost.php';
 
-    $id = $_POST['id'];
-
+    // Set DB connection for the model
     $db = new Database();
-    $conn = $db->getConnection();
+    JobPost::setConnection($db->getConnection());
+
+    $id = (int)$_POST['id'];
+    $success = false;
 
     try {
-        $stmt = $conn->prepare("DELETE FROM job_postings WHERE id = :id");
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
+        $job = JobPost::find($id);
 
-        $success = true;
+        if ($job) {
+            $success = $job->delete();
+        } else {
+            $errorMessage = "Job post not found.";
+        }
     } catch (PDOException $e) {
-        $success = false;
         $errorMessage = $e->getMessage();
     }
 } else {
-    // If no POST data, fallback or redirect
-    header("Location: HrJobDashboard.php");
+    header("Location: hr-job-dashboard.php");
     exit;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,30 +35,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         <?php if (!empty($success)): ?>
-            Swal.fire({
-                title: 'Deleted!',
-                text: 'The job posting has been successfully deleted.',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            }).then(() => {
-                window.location.href = 'HrJobDashboard.php';
-            });
+        Swal.fire({
+            title: 'Deleted!',
+            text: 'The job posting has been successfully deleted.',
+            icon: 'success',
+            confirmButtonText: 'OK'
+        }).then(() => {
+            window.location.href = 'hr-job-dashboard.php';
+        });
         <?php else: ?>
-            Swal.fire({
-                title: 'Error!',
-                text: '<?= addslashes($errorMessage ?? "Unknown error.") ?>',
-                icon: 'error',
-                confirmButtonText: 'Back'
-            }).then(() => {
-                window.location.href = 'HrJobDashboard.php';
-            });
+        Swal.fire({
+            title: 'Error!',
+            text: '<?= addslashes($errorMessage ?? "Unknown error.") ?>',
+            icon: 'error',
+            confirmButtonText: 'Back'
+        }).then(() => {
+            window.location.href = 'hr-job-dashboard.php';
+        });
         <?php endif; ?>
     });
 </script>
-
 </body>
 </html>

@@ -1,11 +1,13 @@
 <?php
 session_start();
+require_once '../../config/database.php';
 
-// Optional: Access check
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin') {
-    header("Location: ../error/errorpage.php");
-    exit;
-}
+// // Optional: Access check
+// if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin') {
+//     header("Location: ../error/errorpage.php");
+//     exit;
+// }
+
 ?>
 
 <!DOCTYPE html>
@@ -48,27 +50,27 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin' && $_SESSION['rol
         <div class="option-card bg-light">
             <h2>HR_Company Form</h2>
             <p>View or manage the HR-related company info</p>
-            <a href="hr_Company.php" class="btn btn-primary">Open</a>
+            <a href="hr-company.php" class="btn btn-primary">Open</a>
         </div>
         <div class="option-card bg-light">
             <h2>Job Post Form</h2>
             <p>Create and update job vacancies</p>
-            <a href="HRCreateJobPost.php" class="btn btn-primary">Open</a>
+            <a href="hr-create-job-post.php" class="btn btn-primary">Open</a>
         </div>
         <div class="option-card bg-light">
             <h2>Create Company Form</h2>
             <p>Register a new company profile</p>
-            <a href="HR.php" class="btn btn-primary">Open</a>
+            <a href="hr-create-company.php" class="btn btn-primary">Open</a>
         </div>
         <div class="option-card bg-light">
             <h2>List of Job Posts</h2>
             <p>View job posts that have been created</p>
-            <a href="HRJobDashboard.php" class="btn btn-primary">View List</a>
+            <a href="hr-job-dashboard.php" class="btn btn-primary">View List</a>
         </div>
     </div>
 
     <div class="mt-4">
-        <a href="../index.php" class="btn btn-secondary">Back to Dashboard</a>
+        <a href="../../public/index.php" class="btn btn-secondary">Back to Dashboard</a>
     </div>
 </div>
 </body>

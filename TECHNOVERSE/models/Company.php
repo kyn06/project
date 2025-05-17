@@ -90,5 +90,24 @@ class Company extends Model {
         }
     }
 
+    public function getCompanyProfile($company_id)
+    {
+        $query = "SELECT name, about FROM companies WHERE id = :id";
+        $stmt = self::$conn->prepare($query); // <-- FIXED HERE
+        $stmt->execute([':id' => $company_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function updateCompanyProfile($company_id, $name, $about)
+    {
+        $query = "UPDATE companies SET name = :name, about = :about WHERE id = :id";
+        $stmt = self::$conn->prepare($query); // <-- FIXED HERE
+        return $stmt->execute([
+            ':name' => $name,
+            ':about' => $about,
+            ':id' => $company_id
+        ]);
+    }
+
 }
 

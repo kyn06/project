@@ -56,9 +56,9 @@
     </div>
     <div class="offcanvas-body p-0">
         <ul class="list-unstyled">
-        <li><a href="../views/hr/hr.php" class="sidebar-link">🏠 HOME</a></li><br>
+        <li><a href="../views/hr/hr-dashboard.php" class="sidebar-link">🏠 HOME</a></li><br>
             <li><a href="../views/superadmin/index.php" class="sidebar-link">⚒ SUPER ADMIN DASHBOARD</a></li><br>
-            <li><a href="../views/hr/hr-create-job-post.php" class="sidebar-link">⚒ HR</a></li><br>
+            <li><a href="../views/hr/hr-select.php" class="sidebar-link">⚒ HR</a></li><br>
             <li><a href="../views/superadmin/superadmin-dashboard.php" class="sidebar-link">🔎 USERSsss</a></li> <br>
             <li><a href="#" class="sidebar-link">🔎 ABOUT</a></li> <br>
             <li><a href="../views/auth/logout.php" class="sidebar-link"> <strong> LOGOUT </strong></a></li> <br>

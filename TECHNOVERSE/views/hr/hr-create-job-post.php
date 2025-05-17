@@ -1,24 +1,26 @@
 <?php
 session_start();
+require_once '../../config/database.php';
+require_once '../../models/JobPost.php'; // Ensure this path is correct
 
 // Redirect if not logged in or not HR
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'HR') {
-    header("Location: authentication/login.php");
+    header("Location: ../views/auth/login.php");
     exit;
 }
-
-require_once '../Database/database.php'; // Include your Database class
 
 $swal = null;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Sanitize inputs
-    $job_title = htmlspecialchars(trim($_POST['job_title']));
-    $job_description = htmlspecialchars(trim($_POST['job_description']));
-    $job_type = htmlspecialchars(trim($_POST['job_type']));
-    $status = htmlspecialchars(trim($_POST['status']));
-    
-    // Ensure company_id is set in session
+    // No htmlspecialchars() — using raw input (you can add custom sanitization if needed)
+    $job_title = trim($_POST['job_title']);
+    $job_description = trim($_POST['job_description']);
+    $job_type = trim($_POST['job_type']);
+    $status_raw = trim($_POST['status']);
+
+    // Translate status string to numeric value (you may adjust according to your DB)
+    $status = strtolower($status_raw) === 'open' ? 1 : 0;
+
     if (!isset($_SESSION['company_id']) || empty($_SESSION['company_id'])) {
         $swal = [
             'icon' => 'error',
@@ -28,89 +30,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    $company_id = $_SESSION['company_id']; // Assign company_id from session
-
     try {
-        // Enable error reporting for debugging
-        ini_set('display_errors', 1);
-        error_reporting(E_ALL);
+        $db = new Database();
+        $conn = $db->getConnection();
+        JobPost::setConnection($conn);
 
-        // Initialize Database
-        $database = new Database();
-        $conn = $database->getConnection();
+        $jobPost = new JobPost([
+            'user_id' => $_SESSION['user_id'],
+            'company_id' => $_SESSION['company_id'],
+            'job_title' => $job_title,
+            'job_description' => $job_description,
+            'job_type' => $job_type,
+            'status' => $status,
+            'posted_at' => date('Y-m-d'),
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
 
-        if ($conn === null) {
-            throw new Exception("Database connection failed.");
-        }
+        $jobPost->save();
 
-        // Set error mode to exception
-        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        // Prepare SQL query
-        $sql = "INSERT INTO job_postings 
-                    (user_id, company_id, job_title, job_description, job_type, status, posted_at, created_at, updated_at)
-                    VALUES 
-                    (:user_id, :company_id, :job_title, :job_description, :job_type, :status, NOW(), NOW(), NOW())";
-
-        $stmt = $conn->prepare($sql);
-
-        // Log the query and parameters for debugging
-        error_log("Prepared SQL: " . $sql);
-        error_log("Parameters: " . print_r([
-            ':user_id' => $_SESSION['user_id'],
-            ':company_id' => $company_id,
-            ':job_title' => $job_title,
-            ':job_description' => $job_description,
-            ':job_type' => $job_type,
-            ':status' => $status
-        ], true));
-
-        // Execute the query
-        if (!$stmt->execute([
-            ':user_id' => $_SESSION['user_id'],
-            ':company_id' => $company_id,
-            ':job_title' => $job_title,
-            ':job_description' => $job_description,
-            ':job_type' => $job_type,
-            ':status' => $status
-        ])) {
-            error_log("Failed to execute query");
-            throw new Exception("Failed to insert job posting.");
-        }
-
-        // Success
         $swal = [
             'icon' => 'success',
             'title' => 'Job Posting Created!',
             'text' => 'The job posting has been added successfully.'
         ];
-    } catch (PDOException $e) {
-        // Log the PDO error
-        error_log("Database Error: " . $e->getMessage());
-
-        // Provide a user-friendly message
-        $swal = [
-            'icon' => 'error',
-            'title' => 'Database Error',
-            'text' => 'An error occurred while saving the job posting. Please try again later.'
-        ];
-
-        // Optionally, display the actual error for debugging
-        echo "Error: " . $e->getMessage();
-        exit();
     } catch (Exception $e) {
-        // Log general errors
-        error_log("General Error: " . $e->getMessage());
+        error_log("Error creating job post: " . $e->getMessage());
 
-        // Provide a user-friendly message
         $swal = [
             'icon' => 'error',
             'title' => 'Error',
-            'text' => $e->getMessage()
+            'text' => 'Failed to create job posting. Please try again.'
         ];
 
-        // Optionally, display the actual error for debugging
-        echo "Error: " . $e->getMessage();
+        echo "Error: " . $e->getMessage(); // You can remove this line in production
         exit();
     }
 }
@@ -134,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Create Job Posting</a>
             <span class="navbar-text text-white">
-                Welcome, <?= isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['full_name']) : 'HR Manager' ?>!
+                Welcome, <?= isset($_SESSION['full_name']) ? $_SESSION['full_name'] : 'HR Manager' ?>
             </span>
         </div>
     </nav>
@@ -171,7 +124,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
                <div class="d-flex justify-content-between mb-3">
                 <button type="submit" class="btn btn-primary">Create Job Posting</button>
-                <a href="HR_Select.php" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="hr-select.php" class="btn btn-secondary">Back to Dashboard</a>
                 </div>
 
             </form>

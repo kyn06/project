@@ -1,62 +1,43 @@
 <?php
-require_once '../Database/database.php';
 session_start();
-
-// Assume company_id is stored in session
-$company_id = $_SESSION['company_id'] ?? 1; // fallback to 1 for demo
+require_once '../../config/database.php';
+require_once '../../models/Company.php';
+require_once '../../models/JobPost.php';
+require_once '../../models/Application.php';
+require_once '../../models/Review.php';
 
 $db = new Database();
 $conn = $db->getConnection();
 
-// --- Handle Profile Update ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $company_name = trim($_POST['company_name']);
-    $company_description = trim($_POST['company_description']);
+Company::setConnection($conn);
+JobPost::setConnection($conn);
+Application::setConnection($conn);
+Review::setConnection($conn);
 
-    $updateQuery = "UPDATE company SET name = :name, description = :description WHERE id = :id";
-    $stmtUpdate = $conn->prepare($updateQuery);
-    $stmtUpdate->execute([
-        ':name' => $company_name,
-        ':description' => $company_description,
-        ':id' => $company_id
-    ]);
+$company_id = $_SESSION['company_id'] ?? 1;
+
+$companyModel = new Company();
+$jobPostModel = new JobPost();
+$applicationModel = new Application();
+$reviewModel = new Review();
+
+// Handle POST update for company profile
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $companyModel->updateCompanyProfile(
+        $company_id,
+        trim($_POST['company_name']),
+        trim($_POST['company_description'])
+    );
 }
 
-// --- Fetch Company Profile ---
-$companyQuery = "SELECT name, description FROM company WHERE id = :id";
-$stmtCompany = $conn->prepare($companyQuery);
-$stmtCompany->execute([':id' => $company_id]);
-$company = $stmtCompany->fetch(PDO::FETCH_ASSOC);
+// Fetch data for display
+$company = $companyModel->getCompanyProfile($company_id);
+$totalJobPosts = $jobPostModel->getTotalJobPosts();
+$applications = $applicationModel->getApplicationsCountPerJobPost();
+$appStatus = $applicationModel->getApplicationsCountByStatus();
+$pendingReviews = $reviewModel->getPendingReviewsCount();
+$approvedReviews = $reviewModel->getApprovedReviewsCount();
 
-// Query to get total job posts
-$query = "SELECT COUNT(*) AS total_job_posts FROM job_postings";
-$stmt = $conn->prepare($query);
-$stmt->execute();
-$totalJobPosts = $stmt->fetch(PDO::FETCH_ASSOC)['total_job_posts'];
-
-// Query for total number of applications per job post
-$queryApplications = "SELECT job_posting_id, COUNT(*) AS total_applications FROM applications GROUP BY job_posting_id";
-$stmtApplications = $conn->prepare($queryApplications);
-$stmtApplications->execute();
-$applications = $stmtApplications->fetchAll(PDO::FETCH_ASSOC);
-
-// Query for the number of completed, in-progress, and rejected applications (based on status_id)
-$queryAppStatus = "SELECT status_id, COUNT(*) AS total FROM applications GROUP BY status_id";
-$stmtAppStatus = $conn->prepare($queryAppStatus);
-$stmtAppStatus->execute();
-$appStatus = $stmtAppStatus->fetchAll(PDO::FETCH_ASSOC);
-
-// Query for total pending reviews
-$queryPendingReviews = "SELECT COUNT(*) AS pending_reviews FROM review WHERE status = 'pending'";
-$stmtPendingReviews = $conn->prepare($queryPendingReviews);
-$stmtPendingReviews->execute();
-$pendingReviews = $stmtPendingReviews->fetch(PDO::FETCH_ASSOC)['pending_reviews'];
-
-// Query for total approved reviews
-$queryApprovedReviews = "SELECT COUNT(*) AS approved_reviews FROM review WHERE status = 'approved'";
-$stmtApprovedReviews = $conn->prepare($queryApprovedReviews);
-$stmtApprovedReviews->execute();
-$approvedReviews = $stmtApprovedReviews->fetch(PDO::FETCH_ASSOC)['approved_reviews'];
 ?>
 
 <!DOCTYPE html>
@@ -81,11 +62,11 @@ $approvedReviews = $stmtApprovedReviews->fetch(PDO::FETCH_ASSOC)['approved_revie
                     <div class="form-group">
                         <label for="company_name">Company Name:</label>
                         <input type="text" class="form-control" id="company_name" name="company_name"
-                               value="<?php echo htmlspecialchars($company['name'] ?? ''); ?>" required>
+                               value="<?php echo $company['name'] ?? ''; ?>" required>
                     </div>
                     <div class="form-group">
                         <label for="company_description">Company Description:</label>
-                        <textarea class="form-control" id="company_description" name="company_description" required><?php echo htmlspecialchars($company['description'] ?? ''); ?></textarea>
+                        <textarea class="form-control" id="company_description" name="company_description" required><?php echo $company['about'] ?? ''; ?></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Update Profile</button>
                 </form>

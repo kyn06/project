@@ -1,19 +1,17 @@
 <?php
-require_once '../database/database.php';
+//JOB DETAILS
+session_start();
+require_once '../../config/database.php';
+require_once '../../models/jobpost.php'; // Adjust path as needed
 
 $db = new Database();
 $conn = $db->getConnection();
 
+$job = null;
+
 if (isset($_GET['id'])) {
     $jobId = $_GET['id'];
-    try {
-        $stmt = $conn->prepare("SELECT * FROM job_postings WHERE id = :id");
-        $stmt->bindParam(':id', $jobId, PDO::PARAM_INT);
-        $stmt->execute();
-        $job = $stmt->fetch(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        die("Query failed: " . $e->getMessage());
-    }
+    $job = JobPost::find($jobId);
 }
 ?>
 
@@ -33,13 +31,13 @@ if (isset($_GET['id'])) {
     <?php if ($job): ?>
         <div class="card mt-4">
             <div class="card-body">
-                <h5 class="card-title"><p><strong>Job Title: </strong><?= htmlspecialchars($job['job_title']) ?></h5>
-                <p><strong>Job Description:</strong> <?= htmlspecialchars($job['job_description']) ?></p>
-                <p><strong>Job Type:</strong> <?= htmlspecialchars($job['job_type']) ?></p>
-                <p><strong>Status:</strong> <?= htmlspecialchars($job['status']) ?></p>
-                <p><strong>Posted At:</strong> <?= htmlspecialchars($job['posted_at']) ?></p>
-                <p><strong>Created At:</strong> <?= htmlspecialchars($job['created_at']) ?></p>
-                <p><strong>Updated At:</strong> <?= htmlspecialchars($job['updated_at']) ?></p>
+                <h5 class="card-title"><strong>Job Title: </strong><?= $job->job_title ?></h5>
+                <p><strong>Job Description:</strong> <?= $job->job_description ?></p>
+                <p><strong>Job Type:</strong> <?= $job->job_type ?></p>
+                <p><strong>Status:</strong> <?= $job->status ?></p>
+                <p><strong>Posted At:</strong> <?= $job->posted_at ?></p>
+                <p><strong>Created At:</strong> <?= $job->created_at ?></p>
+                <p><strong>Updated At:</strong> <?= $job->updated_at ?></p>
             </div>
         </div>
     <?php else: ?>

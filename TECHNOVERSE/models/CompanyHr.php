@@ -1,20 +1,15 @@
-<?php
+<?php  
 
 require_once 'Model.php';
 
-class JobPost extends Model {
-    protected static $table = 'job_postings';
+class CompanyHR extends Model {
+    protected static $table = 'hr_company';
 
-    public $id;
-    public $user_id;
-    public $company_id;
-    public $job_title;
-    public $job_description;
-    public $job_type;
-    public $status;
-    public $posted_at;
-    public $created_at;
-    public $updated_at;
+    private $id;
+    private $user_id;
+    private $company_id;
+    private $created_at;
+    private $updated_at;
 
     public function __construct(array $data = []) {
         foreach ($data as $key => $value) {
@@ -26,7 +21,7 @@ class JobPost extends Model {
 
     public static function all() {
         $results = parent::all();
-        return $results ? array_map(fn($jobpost) => new self($jobpost), $results) : null;
+        return $results ? array_map(fn($companyhr) => new self($companyhr), $results) : null;
     }
 
     public static function find($id) {
@@ -73,35 +68,18 @@ class JobPost extends Model {
         $data = [
             'user_id' => $this->user_id,
             'company_id' => $this->company_id,
-            'job_title' => $this->job_title,
-            'job_description' => $this->job_description,
-            'job_type' => $this->job_type,
-            'status_id' => $this->status,
-            'posted_at' => $this->posted_at,
             'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at
+            'updated_at' => $this->updated_at,
         ];
 
         if ($this->id) {
             $this->update($data);
         } else {
-            $createdJobPost = self::create($data);
-            if ($createdJobPost) {
-                $this->id = $createdJobPost->id;
+            $createdCompanyHR = self::create($data);
+            if ($createdCompanyHR) {
+                $this->id = $createdCompanyHR->id;
             }
         }
     }
 
-    public function getJobPosts() {
-        return $this->fetchJobPostings();
-    }
-
-    public function getTotalJobPosts()
-    {
-        $query = "SELECT COUNT(*) AS total_job_posts FROM job_postings";
-        $stmt = self::$conn->prepare($query);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC)['total_job_posts'];
-    }
-    
 }

@@ -1,18 +1,15 @@
 <?php
 // Include the database connection class
-require_once '../database/database.php';
+require_once '../../config/database.php';
+require_once '../../models/JobPost.php';
 
-// Create an instance of the Database class
 $db = new Database();
-
-// Get the PDO connection
 $conn = $db->getConnection();
 
-// Prepare and execute the query using PDO
+JobPost::setConnection((new Database())->getConnection());
+
 try {
-    $stmt = $conn->prepare("SELECT * FROM job_postings");
-    $stmt->execute();
-    $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $jobs = JobPost::all();
 } catch (PDOException $e) {
     die("Query failed: " . $e->getMessage());
 }
@@ -50,20 +47,20 @@ try {
                 <tbody>
                     <?php foreach ($jobs as $job): ?>
                         <tr>
-                            <td><?= htmlspecialchars($job['id']) ?></td>
-                            <td><?= htmlspecialchars($job['user_id']) ?></td>
-                            <td><?= htmlspecialchars($job['company_id']) ?></td>
-                            <td><?= htmlspecialchars($job['job_title']) ?></td>
-                            <td><?= htmlspecialchars($job['job_description']) ?></td>
-                            <td><?= htmlspecialchars($job['job_type']) ?></td>
+                            <td><?= $job->id ?></td>
+                            <td><?= $job->user_id ?></td>
+                            <td><?= $job->company_id ?></td>
+                            <td><?= $job->job_title ?></td>
+                            <td><?= $job->job_description ?></td>
+                            <td><?= $job->job_type ?></td>
                             <td>
-                                <span class="badge bg-<?= $job['status'] === 'Open' ? 'success' : 'secondary' ?>">
-                                    <?= htmlspecialchars($job['status']) ?>
+                                <span class="badge bg-<?= $job->status == 1 ? 'success' : 'secondary' ?>">
+                                    <?= $job->status == 1 ? 'Open' : 'Closed' ?>
                                 </span>
                             </td>
-                            <td><?= htmlspecialchars($job['posted_at']) ?></td>
-                            <td><?= htmlspecialchars($job['created_at']) ?></td>
-                            <td><?= htmlspecialchars($job['updated_at']) ?></td>
+                            <td><?= $job->posted_at ?></td>
+                            <td><?= $job->created_at ?></td>
+                            <td><?= $job->updated_at ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

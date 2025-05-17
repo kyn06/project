@@ -1,70 +1,73 @@
 <?php
-require_once '../Database/database.php';
+// ASSIGN COMPANY TO HR 
 session_start();
 
-$message = "";
+require_once '../../config/database.php';
+require_once '../../models/CompanyHR.php';
+require_once '../../models/User.php';
 
-// Check if the user is logged in and has the role of 'HR'
-if (isset($_SESSION['user_id']) && $_SESSION['role'] == 'HR') {
+$db = new Database();
+$conn = $db->getConnection();
+
+CompanyHR::setConnection($conn);
+User::setConnection($conn);
+
+$message = "";
+$user_id = 0;
+
+// Determine which user to assign
+if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'HR') {
     $user_id = $_SESSION['user_id'];
 } elseif (isset($_GET['user_id'])) {
-    $user_id = intval($_GET['user_id']);
-} else {
-    $user_id = 0;
+    $user_id = (int)$_GET['user_id'];
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $user_id = intval($_POST['user_id']);
-    $company_id = intval($_POST['company_id']);
-
-    $db = new Database();
-    $conn = $db->getConnection();
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $user_id = (int)$_POST['user_id'];
+    $company_id = (int)$_POST['company_id'];
 
     try {
-        // Begin transaction
-        $conn->beginTransaction();
+        $companyHR = CompanyHR::find($user_id, 'user_id'); 
 
-        // Insert into hr_company
-        $stmt = $conn->prepare("INSERT INTO hr_company (user_id, company_id, created_at, updated_at) VALUES (:user_id, :company_id, NOW(), NOW())");
-        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-        $stmt->bindParam(':company_id', $company_id, PDO::PARAM_INT);
-        $stmt->execute();
+        if ($companyHR) {
+            $companyHR->update([
+                'company_id' => $company_id,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        } else {
+            // Create a new hr_company record
+            $companyHR = new CompanyHR([
+                'user_id' => $user_id,
+                'company_id' => $company_id,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+            $companyHR->save();
+        }
 
-        // Update users table to reflect company_id for this HR
-        $updateStmt = $conn->prepare("UPDATE users SET company_id = :company_id WHERE id = :user_id");
-        $updateStmt->bindParam(':company_id', $company_id, PDO::PARAM_INT);
-        $updateStmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-        $updateStmt->execute();
-
-        // Commit transaction
-        $conn->commit();
-
-        $message = '<div class="alert alert-success">✅ HR linked to company and user updated successfully.</div>';
-    } catch (PDOException $e) {
-        $conn->rollBack();
+        $message = '<div class="alert alert-success">✅ HR successfully assigned to company.</div>';
+    } catch (Exception $e) {
         $message = '<div class="alert alert-danger">❌ Error: ' . $e->getMessage() . '</div>';
     }
 }
 ?>
 
+<!-- ✅ HTML form -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assign Company to HR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-
 <div class="container mt-5">
     <div class="card shadow-sm">
         <div class="card-body">
             <h2 class="card-title mb-4">Assign Company to HR</h2>
 
-            <?php if (!empty($message)): ?>
-                <?= $message ?>
-            <?php endif; ?>
+            <?= $message ?>
 
             <form action="" method="POST">
                 <input type="hidden" name="user_id" value="<?= htmlspecialchars($user_id) ?>">
@@ -84,7 +87,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

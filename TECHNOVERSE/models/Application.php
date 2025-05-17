@@ -95,7 +95,6 @@ class Application extends Model {
         ]);
         return $application->save();
     }
-    
 
     public static function getApplications() {
         return self::getJoinedData([
@@ -131,4 +130,44 @@ class Application extends Model {
     public static function fetchTotalApplications(): int {
         return self::countAll();
     }
+
+    public static function getAllWithUserAndJobDetails() {
+        try {
+            $stmt = self::$conn->query("
+                SELECT 
+                    a.id AS application_id,
+                    a.application_date,
+                    a.letter,
+                    u.full_name,
+                    u.email,
+                    jp.job_title,
+                    jp.job_type,
+                    jp.job_description
+                FROM applications a
+                LEFT JOIN users u ON a.user_id = u.id
+                LEFT JOIN job_postings jp ON a.job_posting_id = jp.id
+                ORDER BY a.application_date DESC
+            ");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (PDOException $e) {
+                throw new Exception("Failed to fetch applications: " . $e->getMessage());
+            }
+    }
+
+    public function getApplicationsCountPerJobPost()
+    {
+        $query = "SELECT job_posting_id, COUNT(*) AS total_applications FROM applications GROUP BY job_posting_id";
+        $stmt = self::$conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getApplicationsCountByStatus()
+    {
+        $query = "SELECT status_id, COUNT(*) AS total FROM applications GROUP BY status_id";
+        $stmt = self::$conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }
