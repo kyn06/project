@@ -165,8 +165,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="status" class="form-label">Status</label>
                     <select class="form-select" name="status" id="status" required>
                         <option value="" disabled selected>Select Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
+                        <option value="Open">Open</option>
+                        <option value="Closed">Closed</option>
                     </select>
                 </div>
                <div class="d-flex justify-content-between mb-3">

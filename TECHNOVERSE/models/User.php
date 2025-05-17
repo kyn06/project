@@ -204,8 +204,6 @@ class User extends Model {
         return $result ? array_map(fn($data) => new self($data), $result) : [];
     }
 
-    
-
     public static function getNavbarFile(): string {
         $role = $_SESSION['role'] ?? null;
 
