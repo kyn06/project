@@ -1,27 +1,21 @@
 <?php
 session_start();
 
-// Auth check
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Super-admin') {
     header("Location: ../error/error404.php");
     exit;
 }
 
-require_once '../database/database.php';
+require_once '../../config/database.php';
+require_once '../../models/Application.php';
 
 $db = new Database();
 $conn = $db->getConnection();
+Application::setConnection($conn);
 
 try {
-    // LEFT JOIN to ensure we get applications even if the user is missing
-    $stmt = $conn->query("
-        SELECT a.id, a.application_date, a.status_id, u.full_name, u.email
-        FROM applications a
-        LEFT JOIN users u ON a.user_id = u.id
-        ORDER BY a.application_date DESC
-    ");
-    $applications = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
+    $applications = Application::getAllWithUserBasic();
+} catch (Exception $e) {
     die("Query failed: " . $e->getMessage());
 }
 ?>
@@ -48,17 +42,17 @@ try {
         <tbody>
             <?php foreach ($applications as $app): ?>
                 <tr>
-                    <td><?= htmlspecialchars($app['id']) ?></td>
-                    <td><?= htmlspecialchars($app['full_name']) ?></td>
-                    <td><?= htmlspecialchars($app['email']) ?></td>
-                    <td><?= htmlspecialchars($app['application_date']) ?></td>
-                    <td><?= htmlspecialchars($app['status_id']) ?></td>
+                    <td><?= $app['id'] ?></td>
+                    <td><?= $app['full_name'] ?></td>
+                    <td><?= $app['email'] ?></td>
+                    <td><?= $app['application_date'] ?></td>
+                    <td><?= $app['status_id'] ?></td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
     <div class="text-center mt-3">
-        <a href="superadminindex.php" class="btn btn-secondary">Back to Dashboard</a>
+        <a href="index.php" class="btn btn-secondary">Back to Dashboard</a>
     </div>
 </div>
 </body>

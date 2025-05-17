@@ -154,6 +154,26 @@ class Application extends Model {
             }
     }
 
+    public static function getAllWithUserBasic()
+    {
+        try {
+            $stmt = self::$conn->query("
+                SELECT 
+                    a.id,
+                    a.application_date,
+                    a.status_id,
+                    u.full_name,
+                    u.email
+                FROM applications a
+                LEFT JOIN users u ON a.user_id = u.id
+                ORDER BY a.application_date DESC
+            ");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Failed to fetch applications: " . $e->getMessage());
+        }
+    }
+
     public function getApplicationsCountPerJobPost()
     {
         $query = "SELECT job_posting_id, COUNT(*) AS total_applications FROM applications GROUP BY job_posting_id";

@@ -1,6 +1,6 @@
 <?php
-require_once 'database/database.php';
-require_once 'Models/Users.php'; // Make sure the path is correct
+require_once '../../config/database.php';
+require_once '../../models/Application.php'; // Make sure the path is correct
 include 'navbar.php'; // Include the navbar
 
 // Simulated HR login
@@ -9,9 +9,8 @@ $hr_id = 1;
 $db = new Database();
 $conn = $db->getConnection();
 
-User::setConnection($conn); // Set DB connection for the model
-$user = new User();
-$applications = $user->getApplications(); // Call getApplications from User class
+Application::setConnection($conn); // Set DB connection for the model
+$applications = Application::getApplications(); // Use Application model to get applications
 
 // --- ✅ Handle Approve/Reject Form ---
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -34,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         'status_id' => $statusId
     ]);
 
-    header("Location: manage_applications.php");
+    header("Location: manage-applications.php");
     exit;
 }
 ?>
@@ -65,15 +64,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             
 <?php foreach ($applications as $app): ?>
     <tr>
-        <td><?= htmlspecialchars($app->full_name ?? 'N/A') ?></td>
-        <td><?= htmlspecialchars($app->job_title ?? 'N/A') ?></td>
-        <td style="max-width: 250px;"><?= nl2br(htmlspecialchars($app->letter ?? '')) ?></td>
-        <td><?= htmlspecialchars($app->application_date ?? 'N/A') ?></td>
-        <td><span class="badge bg-secondary"><?= htmlspecialchars($app->status ?? 'N/A') ?></span></td>
+        <td><?= $app['full_name'] ?? 'N/A' ?></td>
+        <td><?= $app['job_title'] ?? 'N/A' ?></td>
+        <td style="max-width: 250px;"><?= nl2br($app['letter'] ?? '') ?></td>
+        <td><?= $app['application_date'] ?? 'N/A' ?></td>
+        <td><span class="badge bg-secondary"><?= $app['status'] ?? 'N/A' ?></span></td>
         <td>
-            <?php if ($app->status === 'Submitted'): ?>
+            <?php if (($app['status'] ?? '') === 'Submitted'): ?>
                 <form method="POST" class="d-flex gap-2">
-                    <input type="hidden" name="application_id" value="<?= $app->id ?>">
+                    <input type="hidden" name="application_id" value="<?= $app['id'] ?>">
                     <button name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
                     <button name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
                 </form>
@@ -85,7 +84,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <?php endforeach ?>
 </tbody>
 
-            </tbody>
         </table>
     <?php else: ?>
         <div class="alert alert-info">No applications found.</div>

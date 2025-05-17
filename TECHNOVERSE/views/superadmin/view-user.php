@@ -1,5 +1,6 @@
 <?php
-require_once('../database/database.php'); // Adjust path if needed
+require_once('../../config/database.php');
+require_once('../../Models/User.php');
 
 // Get user ID from URL
 $id = isset($_GET['id']) ? $_GET['id'] : '';
@@ -11,18 +12,13 @@ if (empty($id)) {
 
 $db = new Database();
 $conn = $db->getConnection();
+User::setConnection($conn);
 
-try {
-    $stmt = $conn->prepare("SELECT * FROM users WHERE id = :id");
-    $stmt->bindParam(':id', $id);
-    $stmt->execute();
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+// Use the model
+$user = User::find($id);
 
-    if (!$user) {
-        die('User not found.');
-    }
-} catch (PDOException $e) {
-    echo "Query failed: " . $e->getMessage();
+if (!$user) {
+    die('User not found.');
 }
 ?>
 
@@ -46,13 +42,13 @@ try {
         </div>
         <div class="card-body">
             <ul class="list-group">
-                <li class="list-group-item"><strong>Name:</strong> <?= htmlspecialchars($user['full_name']) ?></li>
-                <li class="list-group-item"><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></li>
-                <li class="list-group-item"><strong>Role:</strong> <?= htmlspecialchars($user['role']) ?></li>
+                <li class="list-group-item"><strong>Name:</strong> <?= $user -> full_name ?></li>
+                <li class="list-group-item"><strong>Email:</strong> <?= $user -> email ?></li>
+                <li class="list-group-item"><strong>Role:</strong> <?= $user -> role ?></li>
             </ul>
         </div>
         <div class="card-footer text-center">
-            <a href="dashboardforcreate.php" class="btn btn-secondary">Back to Dashboard</a>
+            <a href="superadmin-user-manage.php" class="btn btn-secondary">Back to Dashboard</a>
         </div>
     </div>
 </div>

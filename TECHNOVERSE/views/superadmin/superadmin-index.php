@@ -4,7 +4,7 @@ session_start();
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     // Redirect to login page if not authenticated
-    header("Location: authentication/login.php");
+    header("Location: ../views/auth/login.php");
     exit;
 }
 
@@ -82,7 +82,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Super-admin') {
 <body>
 
 <!-- Sidebar -->
-<?php include('navbarsuperadmin.php'); ?>
+<?php include('navbar-superadmin.php'); ?>
 
 <!-- Main Content -->
 <div class="dashboard-content">
@@ -92,7 +92,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Super-admin') {
             <a class="navbar-brand" href="#">Job Application Tracker</a>
             <div class="d-flex">
                 <span class="navbar-text me-3">
-                    Welcome, <?php echo htmlspecialchars($_SESSION['full_name'], ENT_QUOTES, 'UTF-8'); ?>!
+                    Welcome, <?php echo ($_SESSION['full_name']; ?>!
                 </span>
                 
             </div>

@@ -57,10 +57,10 @@
     <div class="offcanvas-body p-0">
         <ul class="list-unstyled">
             <li><a href="index.php" class="sidebar-link">🏠 HOME</a></li> <br>
-            <li><a href="/JOB_APPLICATION_TRACKER/Superadmin/Superadminindex.php" class="sidebar-link">⚒ USER ENGAGEMENT</a></li><br>
-            <li><a href="/JOB_APPLICATION_TRACKER/HRDb/HR_Select.php" class="sidebar-link">⚒ HR</a></li><br>
-            <li><a href="index.php" class="sidebar-link">🔎 ABOUT</a></li> <br>
-            <li><a href="/JOB_APPLICATION_TRACKER/authentication/logout.php" class="sidebar-link"> <strong> LOGOUT </strong></a></li> <br>
+            <li><a href="superadmin-user-manage.php" class="sidebar-link">⚒ USER ENGAGEMENT</a></li><br>
+            <li><a href="../hr/hr-select.php" class="sidebar-link">⚒ HR</a></li><br>
+            <li><a href="#" class="sidebar-link">🔎 ABOUT</a></li> <br>
+            <li><a href="../auth/logout.php" class="sidebar-link"> <strong> LOGOUT </strong></a></li> <br>
             
 
         </ul>

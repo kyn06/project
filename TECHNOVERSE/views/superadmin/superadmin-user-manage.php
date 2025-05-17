@@ -1,17 +1,14 @@
 <?php
 session_start();
-require_once('../database/database.php');
+require_once('../../config/database.php');
+require_once('../../Models/User.php');
 
 $db = new Database();
 $conn = $db->getConnection();
 
-$users = [];
-try {
-    $stmt = $conn->query("SELECT * FROM users");
-    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    echo "Query failed: " . $e->getMessage();
-}
+User::setConnection($conn); 
+
+$users = User::all();
 ?>
 
 <!DOCTYPE html>
@@ -85,7 +82,7 @@ try {
 </head>
 <body>
 
-<?php include('navbarsuperadmin.php'); ?>
+<?php include('navbar.php'); ?>
 
 <!-- Show SweetAlert if user was deleted -->
 <?php if (isset($_SESSION['delete_success'])): ?>
@@ -114,14 +111,14 @@ try {
         </tr>
         <?php foreach ($users as $user): ?>
             <tr>
-                <td><?= htmlspecialchars($user['id']) ?></td>
-                <td><?= htmlspecialchars($user['full_name']) ?></td>
-                <td><?= htmlspecialchars($user['role']) ?></td>
-                <td><?= htmlspecialchars($user['email']) ?></td>
+                <td><?= $user->id ?></td>
+                <td><?= $user->full_name ?></td>
+                <td><?= $user->role ?></td>
+                <td><?= $user->email ?></td>
                 <td>
-                    <a class="btn btn-primary" href="view.php?id=<?= $user['id'] ?>">View</a>
-                    <a href="edit.php?id=<?= $user['id'] ?>" class="btn btn-warning">Edit</a>
-                    <button class="btn btn-danger" onclick="confirmDelete(<?= $user['id'] ?>)">Delete</button>
+                    <a class="btn btn-primary" href="view-user.php?id=<?= $user->id ?>">View</a>
+                    <a href="edit-user.php?id=<?= $user->id ?>" class="btn btn-warning">Edit</a>
+                    <button class="btn btn-danger" onclick="confirmDelete(<?= $user->id ?>)">Delete</button>
                 </td>
             </tr>
         <?php endforeach; ?>
@@ -153,11 +150,25 @@ function confirmDelete(userId) {
         confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
         if (result.isConfirmed) {
-            window.location.href = 'delete.php?id=' + userId;
+            window.location.href = 'delete-user.php?id=' + userId;
         }
     });
 }
 </script>
+
+<?php if (isset($_SESSION['update_success'])): ?>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'User Updated',
+            text: 'The user information has been successfully updated.',
+            confirmButtonColor: '#3085d6'
+        });
+    </script>
+    <?php unset($_SESSION['update_success']); ?>
+<?php endif; ?>
+
 
 </body>
 </html>

@@ -1,45 +1,43 @@
 <?php
-require_once '../Database/database.php';
+require_once '../../config/database.php';
+require_once '../../models/User.php';
 
-$swal = null; // Flag to trigger SweetAlert
+$swal = null;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $full_name = htmlspecialchars(trim($_POST['full_name']));
-    $email = htmlspecialchars(trim($_POST['email']));
-    $password = password_hash(trim($_POST['password']), PASSWORD_DEFAULT);
-    $role = $_POST['role']; // Allow role selection
-    $status = $_POST['status']; // Allow status selection
-    $phone_number = htmlspecialchars(trim($_POST['phone_number'])); // Get phone number
+    $full_name = trim($_POST['full_name']);
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']); 
+    $role = trim($_POST['role']);
+    $status = trim($_POST['status']);
+    $phone_number = trim($_POST['phone_number']);
 
     try {
         $database = new Database();
         $conn = $database->getConnection();
+        User::setConnection($conn);
 
-        // Check if email already exists
-        $checkSql = "SELECT id FROM users WHERE email = :email";
-        $checkStmt = $conn->prepare($checkSql);
-        $checkStmt->bindParam(':email', $email);
-        $checkStmt->execute();
+        $existingUser = User::findByEmail($email);
 
-        if ($checkStmt->rowCount() > 0) {
+        if ($existingUser) {
             $swal = [
                 'icon' => 'error',
                 'title' => 'Email Already Exists',
                 'text' => 'An account with this email already exists!'
             ];
         } else {
-            $sql = "INSERT INTO users (full_name, email, password, role, status, phone_number, created_at, updated_at)
-                    VALUES (:full_name, :email, :password, :role, :status, :phone_number, NOW(), NOW())";
+            $user = new User([
+                'full_name' => $full_name,
+                'email' => $email,
+                'password' => $password, 
+                'role' => $role,
+                'status' => $status,
+                'phone_number' => $phone_number,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
 
-            $stmt = $conn->prepare($sql);
-            $stmt->bindParam(':full_name', $full_name);
-            $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':password', $password);
-            $stmt->bindParam(':role', $role);
-            $stmt->bindParam(':status', $status);
-            $stmt->bindParam(':phone_number', $phone_number); // Bind phone number
-
-            $stmt->execute();
+            $user->save();
 
             $swal = [
                 'icon' => 'success',
@@ -123,7 +121,7 @@ Swal.fire({
     confirmButtonColor: '#3085d6'
 }).then((result) => {
     if (result.isConfirmed && '<?= $swal['icon'] ?>' === 'success') {
-        window.location.href = 'Dashboardforcreate.php'; // Change this to your target page after success
+        window.location.href = 'Dashboardforcreate.php';
     }
 });
 </script>

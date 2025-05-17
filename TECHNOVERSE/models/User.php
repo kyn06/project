@@ -58,7 +58,7 @@ class User extends Model {
             $_SESSION['user_id'] = $user->id;
             $_SESSION['email'] = $user->email;
             $_SESSION['role'] = $user->role;
-            $_SESSION['full_name'] = $user['full_name'];
+            $_SESSION['full_name'] = $user->full_name;
             return true;
         }
 
@@ -210,7 +210,7 @@ class User extends Model {
 
         return match ($role) {
             'Job-seeker' => '../views/jobseeker/navbar-js.php',
-            'Super Admin' => '../views/superadmin/navbar-superadmin.php',
+            'Super-admin', 'Admin' => '../views/superadmin/navbar-superadmin.php',
             'HR' => '../views/hr/navbar-hr.php',
             default => '../views/layouts/navbar.php',
         };
