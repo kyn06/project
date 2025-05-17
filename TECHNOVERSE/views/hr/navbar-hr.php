@@ -59,7 +59,7 @@
         <li><a href="../views/hr/hr-dashboard.php" class="sidebar-link">🏠 HOME</a></li><br>
             <li><a href="../views/superadmin/index.php" class="sidebar-link">⚒ SUPER ADMIN DASHBOARD</a></li><br>
             <li><a href="../views/hr/hr-select.php" class="sidebar-link">⚒ HR</a></li><br>
-            <li><a href="../views/superadmin/superadmin-dashboard.php" class="sidebar-link">🔎 USERSsss</a></li> <br>
+            <li><a href="../views/superadmin/superadmin-user-manage.php" class="sidebar-link">🔎 USERSsss</a></li> <br>
             <li><a href="#" class="sidebar-link">🔎 ABOUT</a></li> <br>
             <li><a href="../views/auth/logout.php" class="sidebar-link"> <strong> LOGOUT </strong></a></li> <br>
         </ul>

@@ -76,7 +76,7 @@ class JobPost extends Model {
             'job_title' => $this->job_title,
             'job_description' => $this->job_description,
             'job_type' => $this->job_type,
-            'status_id' => $this->status,
+            'status' => $this->status,
             'posted_at' => $this->posted_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at

@@ -1,7 +1,8 @@
 <?php
 session_start();
 require_once '../../config/database.php';
-require_once '../../models/JobPost.php'; // Ensure this path is correct
+require_once '../../models/JobPost.php';
+require_once '../../models/Company.php'; // Include Company model
 
 // Redirect if not logged in or not HR
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'HR') {
@@ -9,35 +10,45 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'HR') {
     exit;
 }
 
+// Set up database and models
+$db = new Database();
+$conn = $db->getConnection();
+JobPost::setConnection($conn);
+Company::setConnection($conn);
+
+// Fetch companies for dropdown
+$companies = Company::all();
+
+// Capture and clear SweetAlert messages
 $swal = null;
+if (isset($_SESSION['swal'])) {
+    $swal = $_SESSION['swal'];
+    unset($_SESSION['swal']);
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // No htmlspecialchars() — using raw input (you can add custom sanitization if needed)
     $job_title = trim($_POST['job_title']);
     $job_description = trim($_POST['job_description']);
     $job_type = trim($_POST['job_type']);
     $status_raw = trim($_POST['status']);
+    $selected_company_id = trim($_POST['company_id']);
 
-    // Translate status string to numeric value (you may adjust according to your DB)
     $status = strtolower($status_raw) === 'open' ? 1 : 0;
 
-    if (!isset($_SESSION['company_id']) || empty($_SESSION['company_id'])) {
-        $swal = [
+    if (empty($selected_company_id)) {
+        $_SESSION['swal'] = [
             'icon' => 'error',
             'title' => 'Company ID Missing',
-            'text' => 'Unable to find the company ID in your session. Please log in again.'
+            'text' => 'Please select a company for this job posting.'
         ];
+        header("Location: hr-create-job-post.php");
         exit();
     }
 
     try {
-        $db = new Database();
-        $conn = $db->getConnection();
-        JobPost::setConnection($conn);
-
         $jobPost = new JobPost([
             'user_id' => $_SESSION['user_id'],
-            'company_id' => $_SESSION['company_id'],
+            'company_id' => $selected_company_id,
             'job_title' => $job_title,
             'job_description' => $job_description,
             'job_type' => $job_type,
@@ -49,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $jobPost->save();
 
-        $swal = [
+        $_SESSION['swal'] = [
             'icon' => 'success',
             'title' => 'Job Posting Created!',
             'text' => 'The job posting has been added successfully.'
@@ -57,19 +68,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } catch (Exception $e) {
         error_log("Error creating job post: " . $e->getMessage());
 
-        $swal = [
+        $_SESSION['swal'] = [
             'icon' => 'error',
             'title' => 'Error',
             'text' => 'Failed to create job posting. Please try again.'
         ];
-
-        echo "Error: " . $e->getMessage(); // You can remove this line in production
-        exit();
     }
+
+    header("Location: hr-create-job-post.php");
+    exit();
 }
+
 ?>
 
-<!-- HTML BELOW UNCHANGED -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -95,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container">
         <div class="card shadow rounded-4 p-4">
             <h4 class="mb-3">New Job Posting Form</h4>
-            <form method="POST" action="HRCreateJobPost.php">
+            <form method="POST" action="hr-create-job-post.php">
                 <div class="mb-3">
                     <label for="job_title" class="form-label">Job Title</label>
                     <input type="text" class="form-control" name="job_title" id="job_title" required>
@@ -122,11 +133,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <option value="Closed">Closed</option>
                     </select>
                 </div>
-               <div class="d-flex justify-content-between mb-3">
-                <button type="submit" class="btn btn-primary">Create Job Posting</button>
-                <a href="hr-select.php" class="btn btn-secondary">Back to Dashboard</a>
+                <div class="mb-3">
+                    <label for="company_id" class="form-label">Company</label>
+                    <select class="form-select" name="company_id" id="company_id" required>
+                        <option value="" disabled selected>Select Company</option>
+                        <?php foreach ($companies as $company): ?>
+                            <option value="<?= $company->id ?>"><?= htmlspecialchars($company->name) ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
-
+                <div class="d-flex justify-content-between mb-3">
+                    <button type="submit" class="btn btn-primary">Create Job Posting</button>
+                    <a href="hr-select.php" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
             </form>
         </div>
     </div>

@@ -23,6 +23,19 @@ class Company extends Model {
         }
     }
 
+    public function __get($property) {
+        if (property_exists($this, $property)) {
+            return $this->$property;
+        }
+        return null;
+    }
+    
+    public function __set($property, $value) {
+        if(property_exists($this, $property)) {
+            $this->$property = $value;
+        }
+    }
+
     public static function all() {
         $results = parent::all();
         return $results ? array_map(fn($company) => new self($company), $results) : null;
@@ -98,16 +111,12 @@ class Company extends Model {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function updateCompanyProfile($company_id, $name, $about)
-    {
-        $query = "UPDATE companies SET name = :name, about = :about WHERE id = :id";
-        $stmt = self::$conn->prepare($query); // <-- FIXED HERE
-        return $stmt->execute([
-            ':name' => $name,
-            ':about' => $about,
-            ':id' => $company_id
-        ]);
+    public function updateCompanyProfile($id, $name, $about) {
+        $this->name = $name;
+        $this->about = $about;
+        // then run update SQL using $this->name and $this->about
     }
+    
 
 }
 

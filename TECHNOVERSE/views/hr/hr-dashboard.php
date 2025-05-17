@@ -28,6 +28,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         trim($_POST['company_name']),
         trim($_POST['company_description'])
     );
+
+    // Set session flag for success alert
+    $_SESSION['profile_updated'] = true;
+
+    // Redirect to avoid form resubmission
+    header("Location: hr-dashboard.php");
+    exit();
 }
 
 // Fetch data for display
@@ -43,10 +50,11 @@ $approvedReviews = $reviewModel->getApprovedReviewsCount();
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>HR Dashboard</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
 </head>
 <body>
     <div class="container mt-5">
@@ -58,15 +66,15 @@ $approvedReviews = $reviewModel->getApprovedReviewsCount();
                 Company Profile Overview (Editable)
             </div>
             <div class="card-body">
-                <form action="Hrdashboard.php" method="POST">
+                <form id="companyProfileForm" action="hr-dashboard.php" method="POST">
                     <div class="form-group">
                         <label for="company_name">Company Name:</label>
                         <input type="text" class="form-control" id="company_name" name="company_name"
-                               value="<?php echo $company['name'] ?? ''; ?>" required>
+                               value="<?php echo htmlspecialchars($company['name'] ?? ''); ?>" required />
                     </div>
                     <div class="form-group">
                         <label for="company_description">Company Description:</label>
-                        <textarea class="form-control" id="company_description" name="company_description" required><?php echo $company['about'] ?? ''; ?></textarea>
+                        <textarea class="form-control" id="company_description" name="company_description" required><?php echo htmlspecialchars($company['about'] ?? ''); ?></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Update Profile</button>
                 </form>
@@ -142,5 +150,36 @@ $approvedReviews = $reviewModel->getApprovedReviewsCount();
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- SweetAlert confirmation on form submit -->
+    <script>
+        document.getElementById('companyProfileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Confirm Update',
+                text: "Are you sure you want to update the company profile?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, update it!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    e.target.submit();
+                }
+            });
+        });
+    </script>
+
+    <?php if (isset($_SESSION['profile_updated']) && $_SESSION['profile_updated']): ?>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Updated!',
+            text: 'Company profile has been successfully updated.',
+            confirmButtonColor: '#3085d6'
+        });
+    </script>
+    <?php unset($_SESSION['profile_updated']); endif; ?>
 </body>
 </html>
