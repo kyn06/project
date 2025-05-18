@@ -1,6 +1,9 @@
+superadmin-index.php
 <?php
 session_start();
 
+$username = $_SESSION['full_name'] ?? '';
+$role = $_SESSION['role'] ?? 'Not Assigned';
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     // Redirect to login page if not authenticated
@@ -23,60 +26,145 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Super-admin') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            min-height: 100vh;
+            margin: 0;
+            font-family: 'Helvetica', sans-serif;
+            background: #fdf6ec;
+        }
+
+        .header {
             display: flex;
-            flex-direction: column;
-        }
-        /* Sidebar Styles */
-        .sidebar {
-            width: 250px;
-            background-color: #0f1035; /* Dark background color */
-            color: white;
-            height: 100vh; /* Full height of the screen */
-            padding-top: 20px;
-            position: fixed;
-            left: 0;
+            justify-content: space-between;
+            align-items: center;
+            background: #fef8eb;
+            padding: 20px 40px;
+            color: #100e34;
         }
 
-        .sidebar h3 {
-            color: white;
-            padding-bottom: 20px;
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
         }
 
-        .sidebar a {
-            color: white;
-            padding: 10px 15px;
-            text-decoration: none;
-            display: block;
-            margin-bottom: 10px;
+        .header p {
+            margin: 0;
+            color: #777;
+            font-size: 14px;
         }
 
-        .sidebar a:hover {
-            background-color: #575757; /* Highlight color on hover */
+        .username {
+            font-weight: 600;
+            font-size: 14px;
         }
 
-        /* Content area should take up remaining space */
-        .dashboard-content {
-            margin-left: 250px; /* Prevent overlap with sidebar */
+        @media (max-width: 940px) {
+            .greeting-card {
+                flex-direction: column;
+                align-items: center;
+                padding: 0px 15px;
+                text-align: center;
+            }
+
+            .greeting-card img {
+                margin-bottom: 10px;
+            }
+
+            .greeting-text h2,
+            .greeting-text p {
+                display: none;
+            }
+        }
+
+        .greeting-card {
+            display: flex;
+            align-items: center;
+            background-color: #FBB72C;
+            height: 294.3px;
+            margin: 30px 40px;
+            padding: 40px;
+            border-radius: 48px;
+        }
+
+        .greeting-card img {
+            width: 300px;
+            height: 300px;
+            margin-bottom: 5px;
+            margin-right: 30px;
+            object-fit: cover;
+        }
+
+        .greeting-text {
+            color: #fff;
+        }
+
+        .greeting-text h2 {
+            font-size: 36px;
+            margin: 0;
+        }
+
+        .greeting-text p {
+            font-size: 20px;
+            margin-top: 15px;
+        }
+
+        /* Overview Cards */
+        .overview-section {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 40px;
+        }
+
+        .card-overview {
+            flex: 1;
+            min-width: 200px;
+            border-radius: 16px;
             padding: 20px;
-            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            color: white;
         }
 
-        .navbar {
-            margin-bottom: 20px;
+        .card-overview i {
+            font-size: 28px;
+            margin-right: 15px;
         }
 
-        .card {
-            transition: transform 0.2s ease;
+        .bg-applications { background-color: #f4b324; }
+        .bg-complete { background-color: #4f48ec; }
+        .bg-inprogress { background-color: #100e34; }
+        .bg-rejected { background-color: #b95f3b; }
+
+        /* Notification Card */
+        .notification-card {
+            background-color: #fcecc7;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 14px;
+            color:  #747081;
         }
 
-        .card:hover {
-            transform: scale(1.05);
+        .notification-card i {
+            color: #FBC02D;
+            font-size: 18px;
+            margin-right: 10px;
         }
-        .dashboard-content h1 {
-            text-align: center;
+
+        .notification-left {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
         }
-      
+
+        .notification-date {
+            color:  #747081;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -85,88 +173,113 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Super-admin') {
 <?php include('navbar-superadmin.php'); ?>
 
 <!-- Main Content -->
-<div class="dashboard-content">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Job Application Tracker</a>
-            <div class="d-flex">
-                <span class="navbar-text me-3">
-                    Welcome, <?php echo ($_SESSION['full_name']; ?>!
-                </span>
-                
-            </div>
+<div style="background-color:  #fdf6ec;">
+    <div class="header">
+        <div>
+            <h1>Dashboard</h1>
+            <p><?php echo date("l, F j, Y"); ?></p>
         </div>
-    </nav>
-
-    <!-- Dashboard Content -->
-    <div class="container">
-        <h1 class="mb-4">Dashboard</h1>
-
-        <div class="row g-3">
-            <div class="col-md-4">
-                <div class="card text-white bg-primary shadow">
-                    <div class="card-body">
-                        <h5 class="card-title">Application</h5>
-                        <p class="card-text">Total Number of Applications.</p>
-                        <a href="viewapplications.php" class="btn btn-light btn-sm">View</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card text-white bg-secondary shadow">
-                    <div class="card-body">
-                        <h5 class="card-title">IN-PROGRESS</h5>
-                        <p class="card-text">Total Number of In-progress Applications.</p>
-                        <a href="#" class="btn btn-light btn-sm">View</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card text-white bg-success shadow">
-                    <div class="card-body">
-                        <h5 class="card-title">COMPLETED</h5>
-                        <p class="card-text">Total Number of Completed Applications.</p>
-                        <a href="#" class="btn btn-light btn-sm">View</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card text-white bg-danger shadow">
-                    <div class="card-body">
-                        <h5 class="card-title">REJECTED</h5>
-                        <p class="card-text">Total Number of Rejected Applications.</p>
-                        <a href="#" class="btn btn-light btn-sm">View</a> 
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card text-white bg-warning shadow">
-                    <div class="card-body">
-                        <h5 class="card-title">NEW APPLICATION (24 HOURS)</h5>
-                        <p class="card-text">Recent activity within 24 hours.</p>
-                        <a href="#" class="btn btn-light btn-sm">View</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card text-white bg-info shadow">
-                    <div class="card-body">
-                        <h5 class="card-title">NEW JOB POSTING </h5>
-                        <p class="card-text">Recent activity of job posting.</p>
-                        <a href="#" class="btn btn-light btn-sm">View</a>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
+        <div class="username"><i class="fa-solid fa-user-tie"></i> <?php echo $username; ?> (<?php echo $role; ?>)</div>
     </div>
+
+    <!-- Greeting Section -->
+    <div class="greeting-card">
+        <img src="/TECHNOVERSE/public/assets/images/js-index.png" alt="Greeting" />
+        <div class="greeting-text">
+            <h2>Hello, <b><?php echo htmlspecialchars($role); ?> <?php echo htmlspecialchars($username); ?></b></h2>
+            <p style="color: black;">Monitor system activity and oversee platform operations.</p>
+        </div>
+    </div>
+
+    <!-- Overview Section -->
+    <p style="margin: 0 40px 10px 40px; color: #747081;">Overview</p>
+    <div class="overview-section">
+        <div class="card-overview bg-applications">
+            <i class="fa-solid fa-user"></i>
+            <div>
+                <div style="font-size: 24px; font-weight: bold;">560</div>
+                <div>Applications</div>
+            </div>
+        </div>
+
+        <div class="card-overview bg-complete">
+            <i class="fa-solid fa-check-circle"></i>
+            <div>
+                <div style="font-size: 24px; font-weight: bold;">560</div>
+                <div>Complete</div>
+            </div>
+        </div>
+
+        <div class="card-overview bg-inprogress">
+            <i class="fa-solid fa-spinner"></i>
+            <div>
+                <div style="font-size: 24px; font-weight: bold;">560</div>
+                <div>In-progress</div>
+            </div>
+        </div>
+
+        <div class="card-overview bg-rejected">
+            <i class="fa-solid fa-times-circle"></i>
+            <div>
+                <div style="font-size: 24px; font-weight: bold;">560</div>
+                <div>Rejected</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 24-Hour Notification -->
+    <p style="margin: 20px 40px 10px 40px; color: #747081;">Recent Activity</p>
+    <div class="notification-card">
+        <div class="notification-left">
+            <i class="fa-solid fa-bell"></i>
+            [HR Name] posted a new job application
+        </div>
+        <div class="notification-date">May 17, 2025</div>
+    </div>
+    <!-- User Overview Section -->
+<p style="margin: 30px 40px 10px 40px; color: #747081;">Users</p>
+<div class="overview-section">
+    <div class="card-overview bg-applications">
+        <i class="fa-solid fa-user-check"></i>
+        <div>
+            <div style="font-size: 24px; font-weight: bold;">15</div>
+            <div>Active Users</div>
+        </div>
+    </div>
+
+    <div class="card-overview bg-rejected">
+        <i class="fa-solid fa-user-slash"></i>
+        <div>
+            <div style="font-size: 24px; font-weight: bold;">5</div>
+            <div>Inactive Users</div>
+        </div>
+    </div>
+
+    <div class="card-overview bg-inprogress">
+        <i class="fa-solid fa-user-shield"></i>
+        <div>
+            <div style="font-size: 24px; font-weight: bold;">2</div>
+            <div>Super-admins</div>
+        </div>
+    </div>
+
+    <div class="card-overview bg-complete">
+        <i class="fa-solid fa-user-gear"></i>
+        <div>
+            <div style="font-size: 24px; font-weight: bold;">6</div>
+            <div>Admins</div>
+        </div>
+    </div>
+
+    <div class="card-overview bg-applications">
+        <i class="fa-solid fa-user-tie"></i>
+        <div>
+            <div style="font-size: 24px; font-weight: bold;">7</div>
+            <div>HR Users</div>
+        </div>
+    </div>
+</div>
+
 </div>
 
 </body>

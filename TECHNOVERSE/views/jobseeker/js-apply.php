@@ -1,4 +1,7 @@
 <?php
+
+session_start();  // Start session at the top
+
 require_once '../../config/database.php';
 require_once '../../models/Application.php';
 require_once '../../models/JobPost.php';
@@ -12,13 +15,32 @@ JobPost::setConnection($conn);
 $success = '';
 $error = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $jobId = $_POST['job_id'] ?? null;
+// Get userId from session
+$userId = $_SESSION['user_id'] ?? null;
+
+if (!$userId) {
+    $error = "You must be logged in to apply.";
+}
+
+// Get job ID from GET or POST (for displaying and processing)
+$jobId = $_GET['id'] ?? $_POST['job_id'] ?? null;
+
+if (!$jobId) {
+    echo "<div class='alert alert-danger'>Job ID not specified. Please go back and select a job.</div>";
+    exit;
+}
+
+$job = JobPost::find($jobId);
+
+if (!$job) {
+    die("Job not found.");
+}
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
     $letter = trim($_POST['letter'] ?? '');
 
-    if (!$jobId) {
-        $error = "Job ID is required.";
-    } elseif (empty($letter)) {
+    if (empty($letter)) {
         $error = "Cover letter cannot be empty.";
     } else {
         $applied = Application::applyJob($userId, $jobId, $letter);
@@ -31,18 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-if (empty($_GET['id'])) {
-  echo "<div class='alert alert-danger'>Job ID not specified. Please go back and select a job.</div>";
-  exit;
-}
-
-$jobId = $_GET['id'];
-
-$job = JobPost::find($jobId);
-
-if (!$job) {
-    die("Job not found.");
-}
 ?>
 
 <!DOCTYPE html>
@@ -64,7 +74,7 @@ if (!$job) {
     <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
   <?php endif; ?>
 
-  <form action="apply.php?id=<?php echo htmlspecialchars($jobId); ?>" method="POST">
+  <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) . '?id=' . htmlspecialchars($jobId); ?>" method="POST">
     <input type="hidden" name="job_id" value="<?php echo htmlspecialchars($jobId); ?>">
 
     <div class="mb-3">
@@ -100,7 +110,7 @@ if (!$job) {
     <input type="hidden" name="status" value="in-progress">
 
     <button type="submit" class="btn btn-primary">Submit Application</button>
-    <a href="../index.php" class="btn btn-secondary">Cancel</a>
+    <a href="../../public/index.php" class="btn btn-secondary">Cancel</a>
   </form>
 </div>
 
@@ -115,7 +125,7 @@ if (!$job) {
       text: '<?php echo htmlspecialchars($success); ?>',
       confirmButtonText: 'OK',
       willClose: () => {
-        window.location.href = '../index.php';
+        window.location.href = '../../public/index.php';
       }
     });
   <?php endif; ?>

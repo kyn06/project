@@ -174,23 +174,32 @@ class Model {
         }
     }
 
-    public static function getByConditions(array $conditions = [], array $joins = [], string $orderBy = '') {
+    public static function getByConditions(
+        array $conditions = [], 
+        array $joins = [], 
+        string $orderBy = '', 
+        array $select = []
+    ) {
         try {
             $tableAlias = 'a';
-            $sql = "SELECT $tableAlias.*, ";
-
-            foreach ($joins as $alias => $on) {
-                $aliasName = explode(' ', $alias)[1] ?? $alias;
-                $sql .= "$aliasName.*, ";
+    
+            // Use custom SELECT columns if provided, otherwise use default a.* + joined aliases
+            if (!empty($select)) {
+                $sql = "SELECT " . implode(', ', $select);
+            } else {
+                $sql = "SELECT $tableAlias.*";
+                foreach ($joins as $alias => $on) {
+                    $aliasName = explode(' ', $alias)[1] ?? $alias;
+                    $sql .= ", $aliasName.*";
+                }
             }
-            $sql = rtrim($sql, ", ");
-
+    
             $sql .= " FROM " . static::$table . " $tableAlias ";
-
+    
             foreach ($joins as $joinTable => $onCondition) {
                 $sql .= "JOIN $joinTable ON $onCondition ";
             }
-
+    
             if (!empty($conditions)) {
                 $sql .= " WHERE ";
                 $whereClauses = [];
@@ -201,24 +210,24 @@ class Model {
                 }
                 $sql .= implode(' AND ', $whereClauses);
             }
-
+    
             if ($orderBy) {
                 $sql .= " ORDER BY $orderBy";
             }
-
+    
             $stmt = self::$conn->prepare($sql);
             foreach ($conditions as $index => $condition) {
                 $stmt->bindValue(":value$index", $condition[2]);
             }
-
+    
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_OBJ) ?: [];
-
+    
         } catch (PDOException $e) {
             die("Query failed: " . $e->getMessage());
         }
     }
-
+    
     public static function fetchStats(array $statusValues) {
         // statusValues = ['complete' => 2, 'inprogress' => 1, 'rejected' => 3]
         try {

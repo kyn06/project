@@ -21,9 +21,22 @@ $conn = $db->getConnection();
 
 $email = $_SESSION['email'];
 
+// Get user ID based on email
+$stmt = $conn->prepare("SELECT id FROM users WHERE email = :email LIMIT 1");
+$stmt->bindParam(':email', $email);
+$stmt->execute();
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$user) {
+    // User not found, redirect to logout or error
+    header("Location: ../auth/logout.php");
+    exit();
+}
+
+$userId = $user['id'];
+
 Application::setConnection($conn);
-$appModel = new Application();
-$applications = $appModel::getApplicationStatusByEmail($email);
+$applications = Application::getApplicationsByUserId($userId);
 
 ?>
 <!DOCTYPE html>
@@ -47,6 +60,7 @@ $applications = $appModel::getApplicationStatusByEmail($email);
                     <th>Job Title</th>
                     <th>Application Date</th>
                     <th>Status</th>
+                     <th>ACTION</th>
                 </tr>
             </thead>
             <tbody>
@@ -54,10 +68,15 @@ $applications = $appModel::getApplicationStatusByEmail($email);
                     <tr>
                         <td><?= htmlspecialchars($app['full_name']) ?></td>
                         <td><?= htmlspecialchars($app['email']) ?></td>
-                        <td><?= htmlspecialchars($app['application_id']) ?></td>
+                        <td><?= htmlspecialchars($app['id']) ?></td>
                         <td><?= htmlspecialchars($app['job_title'] ?? 'N/A') ?></td>
                         <td><?= htmlspecialchars($app['application_date']) ?></td>
-                        <td><?= htmlspecialchars($app['status_label'] ?? 'Pending') ?></td>
+                        <td><?= htmlspecialchars($app['status_id'] ?? 'Pending') ?></td>
+                      <td>
+                <a href="view-user.php?id=<?= $app['id'] ?>" class="btn btn-info btn-sm">View</a>
+                <a href="edit-user.php?id=<?= $app['id'] ?>" class="btn btn-warning btn-sm">Edit</a>
+                <a href="delete.php?id=<?= $app['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this application?');">Delete</a>
+            </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

@@ -62,27 +62,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </thead>
         <tbody>
             
-<?php foreach ($applications as $app): ?>
-    <tr>
-        <td><?= $app['full_name'] ?? 'N/A' ?></td>
-        <td><?= $app['job_title'] ?? 'N/A' ?></td>
-        <td style="max-width: 250px;"><?= nl2br($app['letter'] ?? '') ?></td>
-        <td><?= $app['application_date'] ?? 'N/A' ?></td>
-        <td><span class="badge bg-secondary"><?= $app['status'] ?? 'N/A' ?></span></td>
-        <td>
-            <?php if (($app['status'] ?? '') === 'Submitted'): ?>
-                <form method="POST" class="d-flex gap-2">
-                    <input type="hidden" name="application_id" value="<?= $app['id'] ?>">
-                    <button name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-                    <button name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                </form>
-            <?php else: ?>
-                <span class="text-muted">No Action</span>
-            <?php endif ?>
-        </td>
-    </tr>
-<?php endforeach ?>
-</tbody>
+    <?php foreach ($applications as $app): ?>
+        <pre><?php print_r($app); ?></pre>
+
+        <tr>
+            <td><?= $app -> full_name ?? 'N/A' ?></td>
+            <td><?= $app -> job_title ?? 'N/A' ?></td>
+            <td style="max-width: 250px;"><?= nl2br($app ->letter  ?? '') ?></td>
+            <td><?= $app -> application_date ?? 'N/A' ?></td>
+            <td><span class="badge bg-secondary"><?= $app -> status ?? 'N/A' ?></span></td>
+            <td>
+                <?php if (($app->status ?? '') === '1'): ?>
+                    <form method="POST" class="d-flex gap-2">
+                        <input type="hidden" name="application_id" value="<?= $app->id ?>">
+                        <button name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
+                        <button name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
+                    </form>
+                <?php else: ?>
+                    <span class="text-muted">No Action</span>
+                <?php endif ?>
+            </td>
+        </tr>
+    <?php endforeach ?>
+    <?php var_dump($app->status); ?>
+    </tbody>
 
         </table>
     <?php else: ?>

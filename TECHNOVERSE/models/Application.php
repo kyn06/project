@@ -101,23 +101,49 @@ class Application extends Model {
             'users u' => 'a.user_id = u.id',
             'job_postings j' => 'a.job_posting_id = j.id',
             'statuses s' => 'a.status_id = s.id',
+            'companies c' => 'j.company_id = c.id'
         ], 'a.application_date DESC');
+    }
+
+    public static function getJobPostings() {
+        try {
+            $stmt = self::$conn->query("
+                SELECT id, job_title, job_type, job_description, posted_at
+                FROM job_postings
+                ORDER BY posted_at DESC
+            ");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Failed to fetch job postings: " . $e->getMessage());
+        }
     }
 
     public static function getApplicationStatusByEmail($email) {
         return self::getByConditions(
+            // WHERE conditions
             [
                 ['u.email', '=', $email],
-                // Add more conditions if needed
             ],
+            // JOINs
             [
                 'users u' => 'a.user_id = u.id',
                 'job_postings jp' => 'a.job_posting_id = jp.id',
                 'statuses s' => 'a.status_id = s.id',
             ],
-            'a.application_date DESC'
+            // ORDER BY
+            'a.application_date DESC',
+            // SELECT fields with aliases
+            [
+                'a.id AS application_id',
+                'a.application_date',
+                'u.full_name',
+                'u.email',
+                'jp.job_title',
+                's.label AS status_label'
+            ]
         );
     }
+    
 
     public static function fetchApplicationStatsByLabel(): array {
         return self::fetchStats([
@@ -142,17 +168,20 @@ class Application extends Model {
                     u.email,
                     jp.job_title,
                     jp.job_type,
-                    jp.job_description
+                    jp.job_description,
+                    c.name AS company_name
                 FROM applications a
                 LEFT JOIN users u ON a.user_id = u.id
                 LEFT JOIN job_postings jp ON a.job_posting_id = jp.id
+                LEFT JOIN companies c ON jp.company_id = c.id
                 ORDER BY a.application_date DESC
             ");
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-            } catch (PDOException $e) {
-                throw new Exception("Failed to fetch applications: " . $e->getMessage());
-            }
+        } catch (PDOException $e) {
+            throw new Exception("Failed to fetch applications: " . $e->getMessage());
+        }
     }
+    
 
     public static function getAllWithUserBasic()
     {
@@ -188,6 +217,31 @@ class Application extends Model {
         $stmt = self::$conn->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function getApplicationsByUserId($userId)
+    {
+        try {
+            $stmt = self::$conn->prepare("
+                SELECT 
+                    a.id,
+                    a.application_date,
+                    a.status_id,
+                    u.full_name,
+                    u.email,
+                    jp.job_title  -- Added job_title from job_postings
+                FROM applications a
+                LEFT JOIN users u ON a.user_id = u.id
+                LEFT JOIN job_postings jp ON a.job_posting_id = jp.id
+                WHERE a.user_id = :user_id
+                ORDER BY a.application_date DESC
+            ");
+            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Failed to fetch user applications: " . $e->getMessage());
+        }
     }
 
 }
